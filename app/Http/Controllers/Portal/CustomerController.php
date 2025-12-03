@@ -24,9 +24,25 @@ class CustomerController extends Controller
             ->orWhere('email', $request->username)
             ->first();
 
-        if ($customer && Hash::check($request->password, $customer->pppoe_password)) {
-            Auth::loginUsingId($customer->user_id ?? $customer->id);
-            return redirect()->route('customer.dashboard');
+        if ($customer) {
+            // Check password - support both plain text and hashed
+            $passwordValid = false;
+            
+            if ($customer->pppoe_password) {
+                // Try plain text comparison first (for PPPoE passwords)
+                if ($request->password === $customer->pppoe_password) {
+                    $passwordValid = true;
+                }
+                // Try bcrypt hash if it looks like a hash
+                elseif (str_starts_with($customer->pppoe_password, '$2y$')) {
+                    $passwordValid = Hash::check($request->password, $customer->pppoe_password);
+                }
+            }
+            
+            if ($passwordValid) {
+                session(['customer_id' => $customer->id]);
+                return redirect()->route('customer.dashboard');
+            }
         }
 
         return back()->with('error', 'Username atau password salah');
@@ -34,20 +50,32 @@ class CustomerController extends Controller
 
     public function logout()
     {
-        Auth::logout();
+        session()->forget('customer_id');
         return redirect()->route('customer.login');
+    }
+
+    protected function getCustomer()
+    {
+        $customerId = session('customer_id');
+        if (!$customerId) {
+            return null;
+        }
+        return Customer::with('package')->find($customerId);
     }
 
     public function dashboard()
     {
-        $customer = Customer::where('user_id', Auth::id())->with('package')->first();
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
         
-        $nextInvoice = Invoice::where('customer_id', $customer->id ?? 0)
+        $nextInvoice = Invoice::where('customer_id', $customer->id)
             ->where('status', 'unpaid')
             ->orderBy('due_date')
             ->first();
 
-        $recentInvoices = Invoice::where('customer_id', $customer->id ?? 0)
+        $recentInvoices = Invoice::where('customer_id', $customer->id)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
@@ -57,8 +85,12 @@ class CustomerController extends Controller
 
     public function invoices()
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
-        $invoices = Invoice::where('customer_id', $customer->id ?? 0)
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+        
+        $invoices = Invoice::where('customer_id', $customer->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -67,7 +99,10 @@ class CustomerController extends Controller
 
     public function showInvoice(Invoice $invoice)
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
         
         if ($invoice->customer_id != $customer->id) {
             abort(403);
@@ -78,8 +113,12 @@ class CustomerController extends Controller
 
     public function payments()
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
-        $payments = Invoice::where('customer_id', $customer->id ?? 0)
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+        
+        $payments = Invoice::where('customer_id', $customer->id)
             ->where('status', 'paid')
             ->orderBy('paid_at', 'desc')
             ->paginate(10);
@@ -89,7 +128,10 @@ class CustomerController extends Controller
 
     public function pay(Request $request, Invoice $invoice)
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
         
         if ($invoice->customer_id != $customer->id) {
             abort(403);
@@ -117,13 +159,20 @@ class CustomerController extends Controller
 
     public function profile()
     {
-        $customer = Customer::where('user_id', Auth::id())->with('package')->first();
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+        
         return view('customer.profile', compact('customer'));
     }
 
     public function updateProfile(Request $request)
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
         
         $request->validate([
             'phone' => 'required',
@@ -137,7 +186,7 @@ class CustomerController extends Controller
 
         if ($request->filled('password')) {
             $customer->update([
-                'pppoe_password' => Hash::make($request->password),
+                'pppoe_password' => $request->password, // Store as plain text for PPPoE
             ]);
         }
 
@@ -146,7 +195,11 @@ class CustomerController extends Controller
 
     public function support()
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
+        $customer = $this->getCustomer();
+        if (!$customer) {
+            return redirect()->route('customer.login');
+        }
+        
         return view('customer.support', compact('customer'));
     }
 
