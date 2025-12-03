@@ -397,6 +397,18 @@ Kami sangat menghargai kontribusi Anda!
 
 ---
 
+## ☕ Support Project
+
+Jika proyek ini bermanfaat untuk Anda, pertimbangkan untuk memberikan dukungan:
+
+<a href="https://saweria.co/rizkylab" target="_blank">
+  <img src="https://img.shields.io/badge/Saweria-Support%20Me-orange?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white" alt="Support via Saweria">
+</a>
+
+Dukungan Anda membantu pengembangan fitur baru dan maintenance proyek ini. Terima kasih! 🙏
+
+---
+
 ## 📄 License
 
 Proyek ini dilisensikan di bawah **MIT License**. Lihat file `LICENSE` untuk detail.
