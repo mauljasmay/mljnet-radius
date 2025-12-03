@@ -38,7 +38,11 @@ RUN mkdir -p /home/$user/.composer && \
 WORKDIR /var/www
 
 # Copy existing application
-COPY --chown=$user:$user . /var/www
+COPY . /var/www
+
+# Create vendor directory and set permissions
+RUN mkdir -p /var/www/vendor /var/www/storage /var/www/bootstrap/cache && \
+    chown -R $user:$user /var/www
 
 USER $user
 
