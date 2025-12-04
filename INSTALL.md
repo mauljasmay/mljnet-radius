@@ -2,8 +2,41 @@
 
 ## Pilihan Instalasi
 
+- [Quick Install (Script Otomatis)](#quick-install)
 - [Instalasi Manual (Tanpa Docker)](#instalasi-manual)
 - [Instalasi dengan Docker](#instalasi-docker)
+
+---
+
+## Quick Install
+
+### Ubuntu 22.04/24.04 (Nginx + MySQL + PHP 8.2)
+
+```bash
+# Download dan jalankan script
+curl -fsSL https://raw.githubusercontent.com/rizkylab/gembok-lara/main/scripts/install-native.sh | sudo bash
+```
+
+Atau manual:
+
+```bash
+# Clone repo
+git clone https://github.com/rizkylab/gembok-lara.git
+cd gembok-lara
+
+# Jalankan script
+chmod +x scripts/install-native.sh
+sudo ./scripts/install-native.sh
+```
+
+Script akan otomatis:
+- Install Nginx, PHP 8.2, MySQL 8
+- Buat database dan user
+- Clone dan setup aplikasi
+- Konfigurasi Nginx virtual host
+- Setup Laravel scheduler cron
+
+Setelah selesai, akses: `http://your-server-ip/admin/login`
 
 ---
 
