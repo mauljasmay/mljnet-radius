@@ -194,6 +194,33 @@ Sistem dilengkapi dengan 23 seeder lengkap untuk data dummy:
 
 ## 🚀 Instalasi & Setup
 
+### ⚡ Quick Install (Recommended)
+
+Untuk instalasi cepat dan otomatis di Ubuntu 22.04:
+
+```bash
+# Download dan jalankan script instalasi cepat
+wget https://raw.githubusercontent.com/mauljasmay/mljnet-radius/main/quick-install-ubuntu.sh
+chmod +x quick-install-ubuntu.sh
+sudo ./quick-install-ubuntu.sh
+```
+
+**Fitur Quick Install:**
+- ✅ Instalasi otomatis semua dependencies
+- ✅ Setup database MySQL otomatis
+- ✅ Konfigurasi environment otomatis
+- ✅ Build assets dan setup permissions
+- ✅ Progress indicator dan error handling
+- ✅ Konfigurasi interaktif untuk custom settings
+
+**Opsi Command Line:**
+```bash
+# Dengan custom konfigurasi
+./quick-install-ubuntu.sh --url=https://myapp.com --email=admin@example.com --password=mypass123
+```
+
+---
+
 ### 📋 Persyaratan Sistem
 
 **Minimum Requirements:**
@@ -209,7 +236,9 @@ Sistem dilengkapi dengan 23 seeder lengkap untuk data dummy:
 - **Composer**: 2.x
 - **Git**: 2.x
 
-### 🐧 Panduan Instalasi Ubuntu 22.04
+### 🐧 Manual Installation (Alternative)
+
+Jika lebih suka instalasi manual step-by-step:
 
 #### Step 1: Update Sistem
 ```bash
