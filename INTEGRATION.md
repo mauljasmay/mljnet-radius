@@ -701,7 +701,7 @@ curl http://localhost:7557/devices
 
 ---
 
-**Need Help?** Open an issue di [GitHub Issues](https://github.com/rizkylab/gembok-lara/issues)
+**Need Help?** Open an issue di [GitHub Issues](https://github.com/mauljasmay/mljnet-radius/issues)
 
 
 ---

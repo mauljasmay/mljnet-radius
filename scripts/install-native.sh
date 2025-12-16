@@ -71,7 +71,7 @@ echo -e "${YELLOW}[8/8] Setting up application...${NC}"
 # Clone or copy application
 if [ ! -d "$APP_DIR" ]; then
     echo "Cloning repository..."
-    git clone https://github.com/rizkylab/gembok-lara.git $APP_DIR
+    git clone https://github.com/mauljasmay/mljnet-radius.git $APP_DIR
 fi
 
 cd $APP_DIR

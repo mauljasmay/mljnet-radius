@@ -194,60 +194,249 @@ Sistem dilengkapi dengan 23 seeder lengkap untuk data dummy:
 
 ## 🚀 Instalasi & Setup
 
-### Prasyarat
-- PHP >= 8.2
-- Composer
-- MySQL >= 8.0
-- Node.js >= 18.x & NPM
+### 📋 Persyaratan Sistem
 
-### Langkah Instalasi
+**Minimum Requirements:**
+- **OS**: Ubuntu 22.04 LTS atau lebih tinggi
+- **RAM**: 2GB (4GB recommended)
+- **Storage**: 5GB free space
+- **CPU**: 1 core (2 cores recommended)
 
-1. **Clone Repository**
-   ```bash
-   git clone https://github.com/rizkylab/gembok-lara.git
-   cd gembok-lara
-   ```
+**Software Requirements:**
+- **PHP**: 8.2 atau 8.3
+- **MySQL**: 8.0 atau MariaDB 10.6+
+- **Node.js**: 18.x atau 20.x
+- **Composer**: 2.x
+- **Git**: 2.x
 
-2. **Install Dependencies**
-   ```bash
-   composer install
-   npm install
-   ```
+### 🐧 Panduan Instalasi Ubuntu 22.04
 
-3. **Konfigurasi Environment**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-   
-   Edit `.env` dan sesuaikan database credentials:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=gembok_lara
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
+#### Step 1: Update Sistem
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 
-4. **Setup Database**
-   ```bash
-   php artisan migrate:fresh --seed
-   ```
+#### Step 2: Install Dependencies Dasar
+```bash
+sudo apt install -y software-properties-common curl wget git unzip
+```
 
-5. **Build Assets**
-   ```bash
-   npm run build
-   # atau untuk development
-   npm run dev
-   ```
+#### Step 3: Install PHP 8.2
+```bash
+# Tambahkan repository PHP
+sudo add-apt-repository ppa:ondrej/php -y
+sudo apt update
 
-6. **Jalankan Server**
-   ```bash
-   php artisan serve
-   ```
+# Install PHP 8.2 dan ekstensi yang dibutuhkan
+sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-mysql \
+php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-bcmath \
+php8.2-gd php8.2-intl php8.2-tokenizer php8.2-fileinfo
 
-Akses aplikasi di: `http://localhost:8000`
+# Verifikasi instalasi PHP
+php --version
+```
+
+#### Step 4: Install MySQL 8.0
+```bash
+# Install MySQL Server
+sudo apt install -y mysql-server
+
+# Jalankan secure installation
+sudo mysql_secure_installation
+
+# Login ke MySQL dan buat database
+sudo mysql -u root -p
+
+# Di dalam MySQL shell:
+CREATE DATABASE mljnet_radius CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'mljnet_user'@'localhost' IDENTIFIED BY 'strong_password_here';
+GRANT ALL PRIVILEGES ON mljnet_radius.* TO 'mljnet_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+#### Step 5: Install Node.js 20.x
+```bash
+# Install Node.js menggunakan NodeSource repository
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Verifikasi instalasi
+node --version
+npm --version
+```
+
+#### Step 6: Install Composer
+```bash
+# Download dan install Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+# Verifikasi instalasi
+composer --version
+```
+
+#### Step 7: Clone dan Setup Project
+```bash
+# Clone repository
+git clone https://github.com/mauljasmay/mljnet-radius.git
+cd mljnet-radius
+
+# Install PHP dependencies
+composer install --no-dev --optimize-autoloader
+
+# Install Node.js dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env
+```
+
+#### Step 8: Konfigurasi Environment
+```bash
+# Generate application key
+php artisan key:generate
+
+# Edit file .env
+nano .env
+```
+
+**Isi file .env:**
+```env
+APP_NAME="MLJ Net"
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=mljnet_radius
+DB_USERNAME=mljnet_user
+DB_PASSWORD=strong_password_here
+
+# Cache & Session
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+# Queue (optional)
+QUEUE_CONNECTION=database
+
+# Mail Configuration (sesuaikan jika perlu)
+MAIL_MAILER=log
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="noreply@mljnet.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+#### Step 9: Setup Database
+```bash
+# Jalankan migrasi dan seeding
+php artisan migrate:fresh --seed
+
+# Jika ada error, pastikan database credentials benar
+```
+
+#### Step 10: Build Assets
+```bash
+# Build untuk production
+npm run build
+
+# Atau untuk development
+# npm run dev
+```
+
+#### Step 11: Setup Permissions
+```bash
+# Set permissions untuk Laravel
+sudo chown -R www-data:www-data storage/
+sudo chown -R www-data:www-data bootstrap/cache/
+sudo chmod -R 775 storage/
+sudo chmod -R 775 bootstrap/cache/
+```
+
+#### Step 12: Jalankan Aplikasi
+```bash
+# Untuk development/testing
+php artisan serve
+
+# Aplikasi akan berjalan di: http://localhost:8000
+```
+
+### 🐳 Alternatif: Menggunakan Docker
+
+Jika lebih suka menggunakan Docker:
+
+```bash
+# Pastikan Docker dan Docker Compose terinstall
+sudo apt install -y docker.io docker-compose
+
+# Jalankan containers
+docker-compose up -d
+
+# Setup database di dalam container
+docker-compose exec app php artisan migrate:fresh --seed
+
+# Akses aplikasi di: http://localhost:8080
+```
+
+### 🔧 Troubleshooting
+
+#### Error: "PHP extension missing"
+```bash
+# Install ekstensi yang missing
+sudo apt install php8.2-[nama-ekstensi]
+```
+
+#### Error: "Permission denied"
+```bash
+# Set permissions yang benar
+sudo chown -R $USER:$USER .
+sudo chmod -R 775 storage/ bootstrap/cache/
+```
+
+#### Error: "Database connection failed"
+- Pastikan MySQL service running: `sudo systemctl status mysql`
+- Periksa credentials di `.env`
+- Pastikan database dan user sudah dibuat
+
+#### Error: "Composer memory limit"
+```bash
+# Increase memory limit
+php -d memory_limit=-1 /usr/local/bin/composer install
+```
+
+### 📊 Verifikasi Instalasi
+
+1. **Buka browser** dan akses `http://localhost:8000`
+2. **Login admin** dengan:
+   - Email: `admin@gembok.com`
+   - Password: `admin123`
+3. **Dashboard** harus muncul dengan data sample
+
+### 🔄 Update Project
+
+```bash
+# Pull latest changes
+git pull origin main
+
+# Update dependencies
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+
+# Run migrations jika ada
+php artisan migrate
+
+# Clear cache
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+```
 
 ---
 
@@ -428,8 +617,8 @@ Kami sangat menghargai kontribusi Anda!
 
 ## 💬 Dukungan
 
-- **Issues**: [GitHub Issues](https://github.com/rizkylab/gembok-lara/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rizkylab/gembok-lara/discussions)
+- **Issues**: [GitHub Issues](https://github.com/mauljasmay/mljnet-radius/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/mauljasmay/mljnet-radius/discussions)
 
 ---
 
@@ -466,9 +655,9 @@ Terima kasih kepada:
 
 ## 📞 Contact
 
-**Developer**: Rizky Lab  
-**Email**: rizkylab@gmail.com 
-**GitHub**: [@rizkylab](https://github.com/rizkylab)
+**Developer**: Maul Jasmay  
+**Email**: mauljasmay2@gmail.com 
+**GitHub**: [@mauljasmay](https://github.com/mauljasmay)
 
 ---
 

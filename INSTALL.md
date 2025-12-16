@@ -21,8 +21,8 @@ Atau manual:
 
 ```bash
 # Clone repo
-git clone https://github.com/rizkylab/gembok-lara.git
-cd gembok-lara
+git clone https://github.com/mauljasmay/mljnet-radius.git
+cd mljnet-radius
 
 # Jalankan script
 chmod +x scripts/install-native.sh
@@ -55,8 +55,8 @@ Setelah selesai, akses: `http://your-server-ip/admin/login`
 #### 1. Clone Repository
 
 ```bash
-git clone https://github.com/rizkylab/gembok-lara.git
-cd gembok-lara
+git clone https://github.com/mauljasmay/mljnet-radius.git
+cd mljnet-radius
 ```
 
 #### 2. Install Dependencies
@@ -172,8 +172,8 @@ php artisan serve
 #### 1. Clone Repository
 
 ```bash
-git clone https://github.com/rizkylab/gembok-lara.git
-cd gembok-lara
+git clone https://github.com/mauljasmay/mljnet-radius.git
+cd mljnet-radius
 ```
 
 #### 2. Konfigurasi Environment
@@ -343,7 +343,7 @@ docker-compose exec app php artisan migrate
 ## Support
 
 Jika mengalami masalah, buka issue di:
-- [GitHub Issues](https://github.com/rizkylab/gembok-lara/issues)
+- [GitHub Issues](https://github.com/mauljasmay/mljnet-radius/issues)
 
 ---
 
