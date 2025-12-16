@@ -17,7 +17,7 @@
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
                     <i class="fas fa-wifi text-white"></i>
                 </div>
-                <span class="text-xl font-bold text-white">Arsa Net</span>
+                <span class="text-xl font-bold text-white">MLJ Net</span>
             </div>
             <a href="{{ route('customer.login') }}" class="text-cyan-400 hover:text-cyan-300">
                 <i class="fas fa-user mr-1"></i> Login
@@ -157,7 +157,7 @@
     <!-- Footer -->
     <footer class="bg-white/5 border-t border-white/10 mt-12">
         <div class="max-w-6xl mx-auto px-4 py-6 text-center text-cyan-300 text-sm">
-            <p>&copy; {{ date('Y') }} Arsa Net. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} MLJ Net. All rights reserved.</p>
         </div>
     </footer>
 

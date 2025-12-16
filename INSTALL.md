@@ -1,4 +1,4 @@
-# 📦 Panduan Instalasi GEMBOK LARA
+# 📦 Panduan Instalasi MLJNET RADIUS
 
 ## Pilihan Instalasi
 
@@ -84,7 +84,7 @@ php artisan key:generate
 Buka file `.env` dan sesuaikan konfigurasi:
 
 ```env
-APP_NAME="Arsa Net"
+APP_NAME="MLJ Net"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://yourdomain.com

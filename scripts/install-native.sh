@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================
-# GEMBOK LARA - Native Installation Script
+# MLJNET RADIUS - Native Installation Script
 # For Ubuntu 22.04/24.04 with Nginx + MySQL
 # ============================================
 
@@ -15,7 +15,7 @@ NC='\033[0m'
 
 echo -e "${GREEN}"
 echo "============================================"
-echo "  GEMBOK LARA - Native Installation"
+echo "  MLJNET RADIUS - Native Installation"
 echo "  Nginx + PHP 8.2 + MySQL 8"
 echo "============================================"
 echo -e "${NC}"

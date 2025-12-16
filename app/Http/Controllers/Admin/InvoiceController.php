@@ -7,6 +7,7 @@ use App\Events\InvoicePaid;
 use App\Services\WhatsAppService;
 use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InvoiceController extends Controller
 {
@@ -142,7 +143,7 @@ class InvoiceController extends Controller
             'status' => 'paid',
             'paid_date' => now(),
             'payment_method' => $request->input('payment_method', 'cash'),
-            'collected_by' => auth()->id(),
+            'collected_by' => Auth::id(),
         ]);
 
         // Fire event for automatic activation
@@ -244,7 +245,7 @@ class InvoiceController extends Controller
     {
         $invoice->load(['customer', 'package']);
         $company = [
-            'name' => \App\Models\AppSetting::where('key', 'company_name')->value('value') ?? 'GEMBOK LARA',
+            'name' => \App\Models\AppSetting::where('key', 'company_name')->value('value') ?? 'MLJNET RADIUS',
             'phone' => \App\Models\AppSetting::where('key', 'company_phone')->value('value') ?? '-',
             'email' => \App\Models\AppSetting::where('key', 'company_email')->value('value') ?? '-',
             'address' => \App\Models\AppSetting::where('key', 'company_address')->value('value') ?? '-',

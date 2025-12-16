@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'GEMBOK LARA') - ISP Management System</title>
+    <title>@yield('title', 'MLJNET RADIUS') - ISP Management System</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,7 +30,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
-                text: '{{ session('success') }}',
+                text: "{{ session('success') }}",
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
@@ -47,7 +47,7 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: '{{ session('error') }}',
+                text: "{{ session('error') }}",
                 showConfirmButton: true,
                 confirmButtonColor: '#0891b2'
             });
@@ -61,7 +61,7 @@
             Swal.fire({
                 icon: 'warning',
                 title: 'Perhatian!',
-                text: '{{ session('warning') }}',
+                text: "{{ session('warning') }}",
                 showConfirmButton: true,
                 confirmButtonColor: '#0891b2'
             });
@@ -75,7 +75,7 @@
             Swal.fire({
                 icon: 'info',
                 title: 'Informasi',
-                text: '{{ session('info') }}',
+                text: "{{ session('info') }}",
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,

@@ -1,4 +1,4 @@
-# GEMBOK LARA - Development Progress
+# MLJNET RADIUS - Development Progress
 
 ## ✅ Completed Features (Updated: Dec 3, 2025)
 

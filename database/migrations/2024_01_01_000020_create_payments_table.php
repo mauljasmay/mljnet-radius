@@ -8,10 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('payments')) {
+            return;
+        }
+
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->constrained()->onDelete('cascade');
-            $table->foreignId('collector_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->unsignedBigInteger('collector_id')->nullable();
             $table->decimal('amount', 12, 2);
             $table->string('payment_method')->default('cash');
             $table->decimal('commission', 10, 2)->default(0);

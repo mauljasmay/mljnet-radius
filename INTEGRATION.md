@@ -1,13 +1,13 @@
-# 🔌 Integration Guide - GEMBOK LARA
+# 🔌 Integration Guide - MLJNET RADIUS
 
-Panduan lengkap untuk integrasi sistem eksternal dengan GEMBOK LARA.
+Panduan lengkap untuk integrasi sistem eksternal dengan MLJNET RADIUS.
 
 ---
 
 ## 📡 Mikrotik Integration
 
 ### Overview
-Integrasi dengan Mikrotik RouterOS untuk manajemen PPPoE dan Hotspot secara otomatis dari dashboard GEMBOK LARA.
+Integrasi dengan Mikrotik RouterOS untuk manajemen PPPoE dan Hotspot secara otomatis dari dashboard MLJNET RADIUS.
 
 ### Prerequisites
 - Mikrotik RouterOS v6.x atau v7.x
@@ -27,7 +27,7 @@ set api address=0.0.0.0/0 disabled=no port=8728
 /user add name=api_user password=your_secure_password group=full
 ```
 
-#### 3. Setup di GEMBOK LARA
+#### 3. Setup di MLJNET RADIUS
 
 Edit `.env`:
 ```env
@@ -183,7 +183,7 @@ sudo systemctl enable genieacs-fs
 sudo systemctl enable genieacs-ui
 ```
 
-### Configuration in GEMBOK LARA
+### Configuration in MLJNET RADIUS
 
 Edit `.env`:
 ```env
@@ -380,7 +380,7 @@ Tagihan internet Anda telah terbit:
 📅 *Jatuh Tempo:* 25 Dec 2025
 
 Terima kasih,
-*GEMBOK LARA*
+*MLJNET RADIUS*
 ```
 
 #### Send Payment Confirmation
@@ -617,7 +617,7 @@ php artisan mikrotik:sync-users --update
 ### Mikrotik
 1. Gunakan SSL/TLS untuk API connection
 2. Buat user khusus dengan permission minimal
-3. Whitelist IP GEMBOK LARA di firewall
+3. Whitelist IP MLJNET RADIUS di firewall
 4. Gunakan strong password
 5. Enable audit logging
 
@@ -730,7 +730,7 @@ sudo ln -s ../mods-available/sql sql
 sudo nano /etc/freeradius/3.0/mods-available/sql
 ```
 
-### Configuration in GEMBOK LARA
+### Configuration in MLJNET RADIUS
 
 Edit `.env`:
 ```env

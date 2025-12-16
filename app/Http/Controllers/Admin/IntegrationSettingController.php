@@ -362,7 +362,7 @@ class IntegrationSettingController extends Controller
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
                 'target' => $request->test_number,
-                'message' => '🔔 Test koneksi dari GEMBOK LARA - ' . now()->format('d/m/Y H:i:s'),
+                'message' => '🔔 Test koneksi dari MLJNET RADIUS - ' . now()->format('d/m/Y H:i:s'),
             ]));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',

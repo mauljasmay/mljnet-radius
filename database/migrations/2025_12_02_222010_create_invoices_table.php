@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('invoices')) {
+            return;
+        }
+
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->foreignId('package_id')->nullable()->constrained('packages')->nullOnDelete();
+            $table->unsignedBigInteger('customer_id')->nullable();
+            $table->unsignedBigInteger('package_id')->nullable();
             $table->integer('amount');
             $table->integer('tax_amount')->default(0);
             $table->text('description')->nullable();

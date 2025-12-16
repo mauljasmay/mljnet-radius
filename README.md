@@ -1,11 +1,11 @@
-# 🔐 GEMBOK LARA - ISP Billing & Management System
+# 🔐 MLJNET RADIUS - ISP Billing & Management System
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql)
 ![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384?style=for-the-badge&logo=chartdotjs)
 
-**GEMBOK LARA** adalah sistem manajemen tagihan dan operasional ISP (Internet Service Provider) yang dibangun menggunakan **Laravel 12**. Sistem ini dirancang dengan antarmuka modern, analitik mendalam, dan fitur lengkap untuk mengelola bisnis ISP Anda.
+**MLJNET RADIUS** adalah sistem manajemen tagihan dan operasional ISP (Internet Service Provider) yang dibangun menggunakan **Laravel 12**. Sistem ini dirancang dengan antarmuka modern, analitik mendalam, dan fitur lengkap untuk mengelola bisnis ISP Anda.
 
 ---
 
@@ -306,7 +306,7 @@ gembok-lara/
 
 ## 🔒 Keamanan
 
-GEMBOK LARA dibangun dengan standar keamanan Laravel:
+MLJNET RADIUS dibangun dengan standar keamanan Laravel:
 
 - ✅ **Authentication** - Session-based dengan Bcrypt hashing
 - ✅ **CSRF Protection** - Token pada semua form
@@ -473,7 +473,7 @@ Terima kasih kepada:
 ---
 
 <div align="center">
-  <strong>GEMBOK LARA</strong> - <em>Simplifying ISP Management</em>
+  <strong>MLJNET RADIUS</strong> - <em>Simplifying ISP Management</em>
   <br><br>
   Made with ❤️ using Laravel & Tailwind CSS
 </div>
