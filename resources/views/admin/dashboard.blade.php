@@ -3,7 +3,6 @@
 @section('title', 'Admin Dashboard')
 
 @push('styles')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endpush
 
 @section('content')
@@ -208,6 +207,7 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Chart.js Global Configuration
     Chart.defaults.font.family = "'Inter', 'system-ui', 'sans-serif'";
@@ -216,295 +216,338 @@
 
     // Revenue Chart
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    const revenueGradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
-    revenueGradient.addColorStop(0, 'rgba(6, 182, 212, 0.3)');
-    revenueGradient.addColorStop(1, 'rgba(6, 182, 212, 0.01)');
+    const revenueData = @json($revenueData);
+    const months = @json($months);
+    
+    if (revenueData.length > 0 && months.length > 0) {
+        const revenueGradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
+        revenueGradient.addColorStop(0, 'rgba(6, 182, 212, 0.3)');
+        revenueGradient.addColorStop(1, 'rgba(6, 182, 212, 0.01)');
 
-    new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: @json($months),
-            datasets: [{
-                label: 'Revenue',
-                data: @json($revenueData),
-                borderColor: 'rgb(6, 182, 212)',
-                backgroundColor: revenueGradient,
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                pointBackgroundColor: 'rgb(6, 182, 212)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointHoverBackgroundColor: 'rgb(6, 182, 212)',
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Revenue',
+                    data: revenueData,
+                    borderColor: 'rgb(6, 182, 212)',
+                    backgroundColor: revenueGradient,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgb(6, 182, 212)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverBackgroundColor: 'rgb(6, 182, 212)',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    padding: 12,
-                    titleColor: '#fff',
-                    titleFont: {
-                        size: 13,
-                        weight: 'bold'
+                plugins: {
+                    legend: {
+                        display: false
                     },
-                    bodyColor: '#fff',
-                    bodyFont: {
-                        size: 12
-                    },
-                    borderColor: 'rgba(6, 182, 212, 0.5)',
-                    borderWidth: 1,
-                    displayColors: false,
-                    callbacks: {
-                        label: function(context) {
-                            return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        padding: 10,
-                        callback: function(value) {
-                            if (value >= 1000000) {
-                                return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
-                            } else if (value >= 1000) {
-                                return 'Rp ' + (value / 1000).toFixed(0) + 'K';
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        padding: 12,
+                        titleColor: '#fff',
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyColor: '#fff',
+                        bodyFont: {
+                            size: 12
+                        },
+                        borderColor: 'rgba(6, 182, 212, 0.5)',
+                        borderWidth: 1,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
                             }
-                            return 'Rp ' + value.toLocaleString('id-ID');
                         }
                     }
                 },
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            padding: 10,
+                            callback: function(value) {
+                                if (value >= 1000000) {
+                                    return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return 'Rp ' + (value / 1000).toFixed(0) + 'K';
+                                }
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        }
                     },
-                    ticks: {
-                        padding: 10
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            padding: 10
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Show message if no data
+        revenueCtx.font = '14px Arial';
+        revenueCtx.textAlign = 'center';
+        revenueCtx.fillStyle = '#6B7280';
+        revenueCtx.fillText('No revenue data available', revenueCtx.canvas.width / 2, revenueCtx.canvas.height / 2);
+    }
 
     // Customer Growth Chart
     const customerCtx = document.getElementById('customerChart').getContext('2d');
-    new Chart(customerCtx, {
-        type: 'bar',
-        data: {
-            labels: @json($months),
-            datasets: [{
-                label: 'New Customers',
-                data: @json($customerGrowth),
-                backgroundColor: 'rgba(59, 130, 246, 0.85)',
-                borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 0,
-                borderRadius: 8,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
+    const customerGrowth = @json($customerGrowth);
+    const customerMonths = @json($months);
+    
+    if (customerGrowth.length > 0 && customerMonths.length > 0) {
+        new Chart(customerCtx, {
+            type: 'bar',
+            data: {
+                labels: customerMonths,
+                datasets: [{
+                    label: 'New Customers',
+                    data: customerGrowth,
+                    backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 0,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        padding: 12,
+                        titleColor: '#fff',
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyColor: '#fff',
+                        bodyFont: {
+                            size: 12
+                        },
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 1,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + ' customers';
+                            }
+                        }
+                    }
                 },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    padding: 12,
-                    titleColor: '#fff',
-                    titleFont: {
-                        size: 13,
-                        weight: 'bold'
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            padding: 10,
+                            stepSize: 1,
+                            precision: 0
+                        }
                     },
-                    bodyColor: '#fff',
-                    bodyFont: {
-                        size: 12
-                    },
-                    borderColor: 'rgba(59, 130, 246, 0.5)',
-                    borderWidth: 1,
-                    displayColors: false,
-                    callbacks: {
-                        label: function(context) {
-                            return context.parsed.y + ' customers';
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            padding: 10
                         }
                     }
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        padding: 10,
-                        stepSize: 1,
-                        precision: 0
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
-                    },
-                    ticks: {
-                        padding: 10
-                    }
-                }
             }
-        }
-    });
+        });
+    } else {
+        // Show message if no data
+        customerCtx.font = '14px Arial';
+        customerCtx.textAlign = 'center';
+        customerCtx.fillStyle = '#6B7280';
+        customerCtx.fillText('No customer data available', customerCtx.canvas.width / 2, customerCtx.canvas.height / 2);
+    }
 
     // Package Distribution Chart
     const packageCtx = document.getElementById('packageChart').getContext('2d');
-    new Chart(packageCtx, {
-        type: 'doughnut',
-        data: {
-            labels: @json($packageStats->pluck('name')),
-            datasets: [{
-                data: @json($packageStats->pluck('customers_count')),
-                backgroundColor: [
-                    'rgba(6, 182, 212, 0.85)',
-                    'rgba(59, 130, 246, 0.85)',
-                    'rgba(16, 185, 129, 0.85)',
-                    'rgba(245, 158, 11, 0.85)',
-                    'rgba(239, 68, 68, 0.85)',
-                    'rgba(139, 92, 246, 0.85)'
-                ],
-                borderWidth: 3,
-                borderColor: '#fff',
-                hoverOffset: 10,
-                hoverBorderWidth: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: {
-                            size: 12,
-                            weight: '500'
+    const packageData = @json($packageStats->pluck('customers_count'));
+    const packageLabels = @json($packageStats->pluck('name'));
+    
+    if (packageData.length > 0 && packageLabels.length > 0) {
+        new Chart(packageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: packageLabels,
+                datasets: [{
+                    data: packageData,
+                    backgroundColor: [
+                        'rgba(6, 182, 212, 0.85)',
+                        'rgba(59, 130, 246, 0.85)',
+                        'rgba(16, 185, 129, 0.85)',
+                        'rgba(245, 158, 11, 0.85)',
+                        'rgba(239, 68, 68, 0.85)',
+                        'rgba(139, 92, 246, 0.85)'
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverOffset: 10,
+                    hoverBorderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
                         }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    padding: 12,
-                    titleColor: '#fff',
-                    titleFont: {
-                        size: 13,
-                        weight: 'bold'
                     },
-                    bodyColor: '#fff',
-                    bodyFont: {
-                        size: 12
-                    },
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return label + ': ' + value + ' (' + percentage + '%)';
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        padding: 12,
+                        titleColor: '#fff',
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyColor: '#fff',
+                        bodyFont: {
+                            size: 12
+                        },
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Show message if no data
+        packageCtx.font = '14px Arial';
+        packageCtx.textAlign = 'center';
+        packageCtx.fillStyle = '#6B7280';
+        packageCtx.fillText('No package data available', packageCtx.canvas.width / 2, packageCtx.canvas.height / 2);
+    }
 
     // Invoice Status Chart
     const invoiceCtx = document.getElementById('invoiceChart').getContext('2d');
-    new Chart(invoiceCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Paid', 'Unpaid'],
-            datasets: [{
-                data: [@json($invoiceStats['paid']), @json($invoiceStats['unpaid'])],
-                backgroundColor: [
-                    'rgba(16, 185, 129, 0.85)',
-                    'rgba(245, 158, 11, 0.85)'
-                ],
-                borderWidth: 3,
-                borderColor: '#fff',
-                hoverOffset: 10,
-                hoverBorderWidth: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                        font: {
-                            size: 12,
-                            weight: '500'
+    const invoiceStats = @json($invoiceStats);
+    
+    if (invoiceStats.paid > 0 || invoiceStats.unpaid > 0) {
+        new Chart(invoiceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Paid', 'Unpaid'],
+                datasets: [{
+                    data: [invoiceStats.paid, invoiceStats.unpaid],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.85)',
+                        'rgba(245, 158, 11, 0.85)'
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverOffset: 10,
+                    hoverBorderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
                         }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    padding: 12,
-                    titleColor: '#fff',
-                    titleFont: {
-                        size: 13,
-                        weight: 'bold'
                     },
-                    bodyColor: '#fff',
-                    bodyFont: {
-                        size: 12
-                    },
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return label + ': ' + value + ' invoices (' + percentage + '%)';
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        padding: 12,
+                        titleColor: '#fff',
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyColor: '#fff',
+                        bodyFont: {
+                            size: 12
+                        },
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return label + ': ' + value + ' invoices (' + percentage + '%)';
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Show message if no data
+        invoiceCtx.font = '14px Arial';
+        invoiceCtx.textAlign = 'center';
+        invoiceCtx.fillStyle = '#6B7280';
+        invoiceCtx.fillText('No invoice data available', invoiceCtx.canvas.width / 2, invoiceCtx.canvas.height / 2);
+    }
 </script>
 @endpush
 @endsection
