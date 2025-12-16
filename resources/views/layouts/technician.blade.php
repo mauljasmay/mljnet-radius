@@ -21,13 +21,18 @@
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
         class="fixed top-0 left-0 z-50 w-64 h-screen bg-gradient-to-b from-slate-900 to-slate-800 transition-transform lg:translate-x-0">
         <!-- Logo -->
-        <div class="flex items-center justify-center h-16 border-b border-slate-700">
+        <div class="flex items-center justify-between h-16 border-b border-slate-700 px-4">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                     <i class="fas fa-tools text-white"></i>
                 </div>
                 <span class="text-xl font-bold text-white">Technician</span>
             </div>
+
+            <!-- Close Button (Mobile) -->
+            <button @click="sidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white transition">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
 
         <!-- Navigation -->

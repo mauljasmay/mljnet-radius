@@ -1,15 +1,23 @@
+<!-- Sidebar Overlay (Mobile) -->
+<div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" x-transition></div>
+
 <!-- Sidebar -->
-<div class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 via-blue-900 to-cyan-900 transform transition-transform duration-300 ease-in-out lg:translate-x-0" 
+<div class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 via-blue-900 to-cyan-900 transform transition-transform duration-300 ease-in-out lg:translate-x-0"
      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-    
+
     <!-- Logo -->
-    <div class="flex items-center justify-center h-16 bg-black bg-opacity-30 border-b border-cyan-500/20">
+    <div class="flex items-center justify-between h-16 bg-black bg-opacity-30 border-b border-cyan-500/20 px-4">
         <div class="flex items-center space-x-3">
             <div class="h-10 w-10 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
                 <i class="fas fa-network-wired text-white"></i>
             </div>
             <span class="text-white font-bold text-xl tracking-wide">MLJNET RADIUS</span>
         </div>
+
+        <!-- Close Button (Mobile) -->
+        <button @click="sidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white transition">
+            <i class="fas fa-times text-xl"></i>
+        </button>
     </div>
 
     <!-- Navigation -->
