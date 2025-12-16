@@ -21,6 +21,7 @@ APP_NAME="mljnet-radius"
 DB_NAME="mljnet_radius"
 DB_USER="mljnet_user"
 DB_PASS=""
+MYSQL_ROOT_PASS=""
 APP_URL="http://localhost:8000"
 ADMIN_EMAIL="admin@mljnet.com"
 ADMIN_PASS="admin123"
@@ -48,6 +49,61 @@ log_step() {
 
 check_root() {
     if [[ $EUID -eq 0 ]]; then
+        log_error "This script should not be run as root. Please run as a regular user with sudo access."
+        exit 1
+    fi
+
+    # Check if sudo is available
+    if ! command -v sudo &> /dev/null; then
+        log_error "sudo is required but not installed. Please install sudo first."
+        exit 1
+    fi
+}
+
+show_help() {
+    echo "MLJNET RADIUS Quick Install Script for Ubuntu 22.04"
+    echo ""
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  -p, --db-password PASS    Set MySQL database password"
+    echo "  -r, --mysql-root PASS     Set MySQL root password"
+    echo "  -u, --app-url URL         Set application URL (default: http://localhost:8000)"
+    echo "  -h, --help                Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                    # Use default settings"
+    echo "  $0 -p mypassword                     # Set database password"
+    echo "  $0 -p mypassword -r rootpass         # Set both passwords"
+    echo "  $0 -u http://myapp.com               # Set custom URL"
+}
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -p|--db-password)
+            DB_PASS="$2"
+            shift 2
+            ;;
+        -r|--mysql-root)
+            MYSQL_ROOT_PASS="$2"
+            shift 2
+            ;;
+        -u|--app-url)
+            APP_URL="$2"
+            shift 2
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
         log_error "This script should not be run as root"
         exit 1
     fi
@@ -101,30 +157,65 @@ install_php() {
 install_mysql() {
     log_step "4/12 Installing MySQL 8.0..."
 
-    # Generate random password if not provided
+    # Check if MySQL is already installed
+    if command -v mysql &> /dev/null; then
+        log_warning "MySQL is already installed. Skipping installation."
+        return 0
+    fi
+
+    # Generate passwords if not provided
     if [[ -z "$DB_PASS" ]]; then
         DB_PASS=$(openssl rand -base64 12)
-        log_info "Generated MySQL password: $DB_PASS"
+        log_info "Generated database password: $DB_PASS"
     fi
+
+    if [[ -z "$MYSQL_ROOT_PASS" ]]; then
+        MYSQL_ROOT_PASS=$(openssl rand -base64 12)
+        log_info "Generated MySQL root password: $MYSQL_ROOT_PASS"
+    fi
+
+    # Save passwords to a file for reference
+    echo "MySQL Root Password: $MYSQL_ROOT_PASS" > mysql_passwords.txt
+    echo "Database Password: $DB_PASS" >> mysql_passwords.txt
+    echo "Database User: $DB_USER" >> mysql_passwords.txt
+    echo "Database Name: $DB_NAME" >> mysql_passwords.txt
+    log_info "Passwords saved to mysql_passwords.txt"
 
     # Install MySQL
     sudo apt install -y mysql-server
 
-    # Secure MySQL installation (automated)
-    sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';"
-    sudo mysql -e "DELETE FROM mysql.user WHERE User='';"
-    sudo mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-    sudo mysql -e "DROP DATABASE IF EXISTS test;"
-    sudo mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
-    sudo mysql -e "FLUSH PRIVILEGES;"
+    # Stop MySQL service temporarily
+    sudo systemctl stop mysql
 
-    # Create database and user
-    sudo mysql -u root -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-    sudo mysql -u root -p"$DB_PASS" -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';"
-    sudo mysql -u root -p"$DB_PASS" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
-    sudo mysql -u root -p"$DB_PASS" -e "FLUSH PRIVILEGES;"
+    # Start MySQL in safe mode to set root password
+    sudo mysqld_safe --skip-grant-tables --skip-networking &
+    sleep 5
 
-    log_success "MySQL installed and configured"
+    # Set root password and create database/user
+    sudo mysql -u root << EOF
+FLUSH PRIVILEGES;
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASS';
+CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
+FLUSH PRIVILEGES;
+EOF
+
+    # Stop the safe mode MySQL
+    sudo pkill mysqld
+    sleep 2
+
+    # Start MySQL service normally
+    sudo systemctl start mysql
+    sudo systemctl enable mysql
+
+    # Test connection
+    if mysql -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1;" &> /dev/null; then
+        log_success "MySQL installed and configured successfully"
+    else
+        log_error "Failed to connect to MySQL with created user"
+        exit 1
+    fi
 }
 
 install_nodejs() {
@@ -166,20 +257,29 @@ setup_environment() {
     log_step "8/12 Setting up environment..."
     cd "$APP_NAME"
 
+    # Check if .env.example exists
+    if [[ ! -f ".env.example" ]]; then
+        log_error ".env.example file not found. Please ensure the project is properly cloned."
+        exit 1
+    fi
+
     # Copy environment file
     cp .env.example .env
 
     # Generate application key
     php artisan key:generate
 
-    # Update .env file
-    sed -i "s|APP_NAME=Laravel|APP_NAME=\"MLJ Net\"|" .env
-    sed -i "s|APP_ENV=local|APP_ENV=production|" .env
-    sed -i "s|APP_DEBUG=true|APP_DEBUG=false|" .env
-    sed -i "s|APP_URL=http://localhost|APP_URL=$APP_URL|" .env
-    sed -i "s|DB_DATABASE=laravel|DB_DATABASE=$DB_NAME|" .env
-    sed -i "s|DB_USERNAME=root|DB_USERNAME=$DB_USER|" .env
-    sed -i "s|DB_PASSWORD=|DB_PASSWORD=$DB_PASS|" .env
+    # Update .env file with proper escaping
+    sed -i "s|APP_NAME=.*|APP_NAME=\"MLJ Net\"|" .env
+    sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
+    sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
+    sed -i "s|APP_URL=.*|APP_URL=\"$APP_URL\"|" .env
+    sed -i "s|DB_CONNECTION=.*|DB_CONNECTION=mysql|" .env
+    sed -i "s|DB_HOST=.*|DB_HOST=127.0.0.1|" .env
+    sed -i "s|DB_PORT=.*|DB_PORT=3306|" .env
+    sed -i "s|DB_DATABASE=.*|DB_DATABASE=\"$DB_NAME\"|" .env
+    sed -i "s|DB_USERNAME=.*|DB_USERNAME=\"$DB_USER\"|" .env
+    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=\"$DB_PASS\"|" .env
 
     log_success "Environment configured"
 }
@@ -240,14 +340,32 @@ show_completion() {
     echo "   • Application: MLJNET RADIUS"
     echo "   • URL: $APP_URL"
     echo "   • Database: $DB_NAME"
+    echo "   • Database User: $DB_USER"
     echo "   • Admin Email: $ADMIN_EMAIL"
     echo "   • Admin Password: $ADMIN_PASS"
+    echo ""
+    echo "🔐 Important Passwords:"
+    if [[ -f "mysql_passwords.txt" ]]; then
+        echo "   • MySQL Root Password: $MYSQL_ROOT_PASS"
+        echo "   • Database Password: $DB_PASS"
+        echo "   • Passwords also saved to: mysql_passwords.txt"
+    fi
     echo ""
     echo "🚀 Next Steps:"
     echo "   1. Start the application:"
     echo "      cd $APP_NAME && php artisan serve"
     echo ""
     echo "   2. Open browser and go to: $APP_URL"
+    echo ""
+    echo "   3. Login with admin credentials above"
+    echo ""
+    echo "📝 Additional Notes:"
+    echo "   • Make sure to change the default admin password after first login"
+    echo "   • Configure your web server (nginx/apache) for production use"
+    echo "   • Set up SSL certificates for HTTPS"
+    echo "   • Configure backup scripts for database and files"
+    echo ""
+}
     echo ""
     echo "   3. Login with admin credentials above"
     echo ""

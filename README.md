@@ -215,8 +215,17 @@ sudo ./quick-install-ubuntu.sh
 
 **Opsi Command Line:**
 ```bash
-# Dengan custom konfigurasi
-./quick-install-ubuntu.sh --url=https://myapp.com --email=admin@example.com --password=mypass123
+# Penggunaan dasar (password akan di-generate otomatis)
+./quick-install-ubuntu.sh
+
+# Dengan custom database password
+./quick-install-ubuntu.sh -p mypassword
+
+# Dengan custom URL dan password
+./quick-install-ubuntu.sh -u https://myapp.com -p mypassword -r rootpassword
+
+# Lihat semua opsi
+./quick-install-ubuntu.sh --help
 ```
 
 ---
