@@ -1,0 +1,4 @@
+- [x] Change APP_NAME to "mljnet-radius"
+- [x] Add installation of redis-server and snmp
+- [x] Set MySQL root password
+- [x] Update sed commands for .env

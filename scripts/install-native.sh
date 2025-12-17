@@ -21,7 +21,7 @@ echo "============================================"
 echo -e "${NC}"
 
 # Configuration
-APP_NAME="gembok-lara"
+APP_NAME="mljnet-radius"
 APP_DIR="/var/www/${APP_NAME}"
 DB_NAME="gemboklara"
 DB_USER="gembok"
@@ -45,7 +45,7 @@ add-apt-repository -y ppa:ondrej/php
 apt update
 apt install -y php8.2-fpm php8.2-cli php8.2-mysql php8.2-mbstring \
     php8.2-xml php8.2-curl php8.2-zip php8.2-gd php8.2-bcmath \
-    php8.2-intl php8.2-redis php8.2-snmp php8.2-sockets
+    php8.2-intl php8.2-redis php8.2-snmp php8.2-sockets redis-server snmp
 
 echo -e "${YELLOW}[4/8] Installing Nginx...${NC}"
 apt install -y nginx
@@ -58,6 +58,7 @@ systemctl start mysql
 systemctl enable mysql
 
 echo -e "${YELLOW}[6/8] Creating database...${NC}"
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root123';"
 mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
 mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
@@ -85,14 +86,14 @@ if [ ! -f ".env" ]; then
 fi
 
 # Configure .env
-sed -i "s/APP_ENV=local/APP_ENV=production/" .env
-sed -i "s/APP_DEBUG=true/APP_DEBUG=false/" .env
-sed -i "s/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/" .env
-sed -i "s/# DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/" .env
-sed -i "s/# DB_PORT=3306/DB_PORT=3306/" .env
-sed -i "s/# DB_DATABASE=laravel/DB_DATABASE=${DB_NAME}/" .env
-sed -i "s/# DB_USERNAME=root/DB_USERNAME=${DB_USER}/" .env
-sed -i "s/# DB_PASSWORD=/DB_PASSWORD=${DB_PASS}/" .env
+sed -i "s/APP_ENV=.*/APP_ENV=production/" .env
+sed -i "s/APP_DEBUG=.*/APP_DEBUG=false/" .env
+sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=mysql/" .env
+sed -i "s/DB_HOST=.*/DB_HOST=127.0.0.1/" .env
+sed -i "s/DB_PORT=.*/DB_PORT=3306/" .env
+sed -i "s/DB_DATABASE=.*/DB_DATABASE=${DB_NAME}/" .env
+sed -i "s/DB_USERNAME=.*/DB_USERNAME=${DB_USER}/" .env
+sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${DB_PASS}/" .env
 
 # Generate key and run migrations
 php artisan key:generate --force
