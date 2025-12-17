@@ -212,6 +212,9 @@ docker-compose logs -f
 # Masuk ke container
 docker-compose exec app bash
 
+# Install PHP dependencies
+composer install --no-interaction --prefer-dist --optimize-autoloader
+
 # Generate key
 php artisan key:generate
 

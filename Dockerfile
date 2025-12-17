@@ -46,8 +46,5 @@ RUN mkdir -p /var/www/vendor /var/www/storage /var/www/bootstrap/cache && \
 
 USER $user
 
-# Install dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
 EXPOSE 9000
 CMD ["php-fpm"]
