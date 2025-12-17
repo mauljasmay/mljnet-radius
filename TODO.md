@@ -1,4 +1,4 @@
-- [x] Change APP_NAME to "mljnet-radius"
-- [x] Add installation of redis-server and snmp
-- [x] Set MySQL root password
-- [x] Update sed commands for .env
+- [x] Update MySQL image in docker-compose.yml from 8.0 to 8.4
+- [x] Ensure phpMyAdmin image is set to latest (phpmyadmin/phpmyadmin:latest)
+- [ ] Test the updated Docker setup by running docker-compose up -d --build (requires Docker to be running)
+- [ ] Verify containers are running and accessible
