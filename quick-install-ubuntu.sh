@@ -104,9 +104,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
-        log_error "This script should not be run as root"
-        exit 1
-    fi
 }
 
 check_os() {

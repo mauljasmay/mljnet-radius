@@ -58,11 +58,21 @@ systemctl start mysql
 systemctl enable mysql
 
 echo -e "${YELLOW}[6/8] Creating database...${NC}"
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root123';"
-mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
-mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
-mysql -e "FLUSH PRIVILEGES;"
+# Stop MySQL and start with skip-grant-tables to reset root password
+systemctl stop mysql
+mkdir -p /var/run/mysqld
+chown mysql:mysql /var/run/mysqld
+mysqld_safe --skip-grant-tables --skip-networking &
+sleep 10
+mysql -u root -e "FLUSH PRIVILEGES;"
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root123';"
+systemctl stop mysql
+systemctl start mysql
+# Now create database with password
+mysql -u root -p'root123' -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p'root123' -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
+mysql -u root -p'root123' -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
+mysql -u root -p'root123' -e "FLUSH PRIVILEGES;"
 
 echo -e "${YELLOW}[7/8] Installing Composer...${NC}"
 curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
