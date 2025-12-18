@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-@include('admin.partials.sidebar')
-@include('admin.partials.topbar')
+<div class="min-h-screen bg-gray-100" x-data="{ sidebarOpen: false }">
+    @include('admin.partials.sidebar')
+    @include('admin.partials.topbar')
 
-<main class="lg:ml-64 pt-16 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
+    <main class="lg:ml-64 pt-16 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
     <div class="p-6">
         <!-- Header -->
         <div class="mb-6">
@@ -35,8 +36,21 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Nama Gateway</label>
-                                <input type="text" name="name" value="{{ $setting->name ?? 'WhatsApp Gateway' }}" 
+                                <input type="text" name="name" value="{{ $setting->name ?? 'WhatsApp Gateway' }}"
                                        class="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Provider <span class="text-red-400">*</span></label>
+                                <select name="provider" id="provider" required
+                                        class="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white">
+                                    <option value="">Pilih Provider</option>
+                                    <option value="fonnte" {{ $setting->getConfig('provider') == 'fonnte' ? 'selected' : '' }}>Fonnte</option>
+                                    <option value="wablas" {{ $setting->getConfig('provider') == 'wablas' ? 'selected' : '' }}>Wablas</option>
+                                    <option value="woowa" {{ $setting->getConfig('provider') == 'woowa' ? 'selected' : '' }}>Woowa</option>
+                                    <option value="mpwa" {{ $setting->getConfig('provider') == 'mpwa' ? 'selected' : '' }}>MPWA (Multi-Platform WhatsApp)</option>
+                                    <option value="custom" {{ $setting->getConfig('provider') == 'custom' ? 'selected' : '' }}>Custom API</option>
+                                </select>
                             </div>
 
                             <div class="md:col-span-2">
@@ -125,6 +139,7 @@
                         <li>• Fonnte</li>
                         <li>• Wablas</li>
                         <li>• Woowa</li>
+                        <li>• MPWA (Multi-Platform WhatsApp)</li>
                         <li>• Custom API</li>
                     </ul>
                 </div>
@@ -154,11 +169,12 @@ function showTestModal() { document.getElementById('testModal').classList.remove
 function hideTestModal() { document.getElementById('testModal').classList.add('hidden'); document.getElementById('testModal').classList.remove('flex'); }
 
 function testConnection() {
+    const provider = document.getElementById('provider').value;
     const api_url = document.getElementById('api_url').value;
     const api_key = document.getElementById('api_key').value;
     const test_number = document.getElementById('test_number').value;
-    
-    if (!api_url || !api_key || !test_number) { alert('Mohon lengkapi semua field'); return; }
+
+    if (!provider || !api_url || !api_key || !test_number) { alert('Mohon lengkapi semua field'); return; }
     
     hideTestModal();
     document.getElementById('testPlaceholder').classList.add('hidden');
@@ -168,7 +184,7 @@ function testConnection() {
     fetch('{{ route("admin.settings.whatsapp.test") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        body: JSON.stringify({ api_url, api_key, test_number })
+        body: JSON.stringify({ provider, api_url, api_key, test_number })
     })
     .then(r => r.json())
     .then(data => {
@@ -189,6 +205,6 @@ function testConnection() {
         document.getElementById('testError').classList.remove('hidden');
         document.getElementById('errorMessage').textContent = e.message;
     });
-}
+    }
 </script>
 @endsection

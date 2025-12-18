@@ -327,6 +327,7 @@ class IntegrationSettingController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string|max:255',
+            'provider' => 'required|string|in:fonnte,wablas,woowa,mpwa,custom',
             'api_url' => 'required|url',
             'api_key' => 'required|string',
         ]);
@@ -337,6 +338,7 @@ class IntegrationSettingController extends Controller
                 'name' => $request->name ?? 'WhatsApp Gateway',
                 'enabled' => $request->boolean('enabled'),
                 'config' => [
+                    'provider' => $request->provider,
                     'api_url' => rtrim($request->api_url, '/'),
                     'api_key' => $request->api_key,
                     'sender' => $request->sender,
@@ -351,46 +353,34 @@ class IntegrationSettingController extends Controller
     public function testWhatsapp(Request $request)
     {
         $request->validate([
+            'provider' => 'required|string|in:fonnte,wablas,woowa,mpwa,custom',
             'api_url' => 'required|url',
             'api_key' => 'required|string',
-            'test_number' => 'required|string',
+            'test_number' => 'required|string|regex:/^[0-9+\-\s()]+$/',
         ]);
 
         try {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, rtrim($request->api_url, '/') . '/send');
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-                'target' => $request->test_number,
-                'message' => '🔔 Test koneksi dari MLJNET RADIUS - ' . now()->format('d/m/Y H:i:s'),
-            ]));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: ' . $request->api_key,
-            ]);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $error = curl_error($ch);
-            curl_close($ch);
+            $testMessage = '🔔 Test koneksi dari MLJNET RADIUS - ' . now()->format('d/m/Y H:i:s');
 
-            if ($error) {
-                throw new \Exception($error);
-            }
+            // Create WhatsApp service instance and set test settings
+            $whatsappService = new \App\Services\WhatsAppService();
+            $whatsappService->setTestSettings(
+                $request->provider,
+                $request->api_url,
+                $request->api_key
+            );
 
-            $result = json_decode($response, true);
+            $result = $whatsappService->send($request->test_number, $testMessage);
 
             // Update test result
             $setting = IntegrationSetting::getByType('whatsapp');
             if ($setting) {
-                $setting->updateTestResult($httpCode === 200, $response);
+                $setting->updateTestResult($result['success'], json_encode($result));
             }
 
             return response()->json([
-                'success' => $httpCode === 200,
-                'message' => $httpCode === 200 ? 'Pesan test berhasil dikirim!' : 'Gagal mengirim pesan',
+                'success' => $result['success'],
+                'message' => $result['success'] ? 'Pesan test berhasil dikirim!' : 'Gagal mengirim pesan: ' . ($result['message'] ?? 'Unknown error'),
                 'data' => $result
             ]);
 

@@ -194,7 +194,50 @@ Sistem dilengkapi dengan 23 seeder lengkap untuk data dummy:
 
 ## 🚀 Instalasi & Setup
 
-### ⚡ Quick Install (Recommended)
+### ⚡ One-Click Automated Install (New!)
+
+Untuk instalasi **sepenuhnya otomatis** tanpa interaksi pengguna di Ubuntu 22.04:
+
+```bash
+# One-liner installation (jalankan sebagai user biasa, bukan root)
+curl -fsSL https://raw.githubusercontent.com/mauljasmay/mljnet-radius/main/auto-install-ubuntu.sh | bash
+```
+
+**Fitur Automated Install:**
+- ✅ **Zero-interaction**: Tidak ada prompt atau input dari user
+- ✅ **Sensible defaults**: URL `http://localhost:8000`, admin `admin@gembok.com`/`admin123`
+- ✅ **Auto-generated passwords**: Password MySQL di-generate otomatis
+- ✅ **Complete setup**: Install semua dependencies, setup database, build assets
+- ✅ **Progress tracking**: Log detail setiap langkah instalasi
+- ✅ **Error handling**: Stop otomatis jika ada error
+- ✅ **Verification ready**: Siap untuk verifikasi instalasi
+
+**Environment Variables (untuk customization):**
+```bash
+# Custom application URL
+AUTO_INSTALL_APP_URL=https://myapp.com curl -fsSL https://raw.githubusercontent.com/mauljasmay/mljnet-radius/main/auto-install-ubuntu.sh | bash
+
+# Custom admin credentials
+AUTO_INSTALL_ADMIN_EMAIL=admin@example.com AUTO_INSTALL_ADMIN_PASS=mypassword curl -fsSL https://raw.githubusercontent.com/mauljasmay/mljnet-radius/main/auto-install-ubuntu.sh | bash
+
+# Kombinasi lengkap
+AUTO_INSTALL_APP_URL=https://myisp.com AUTO_INSTALL_ADMIN_EMAIL=admin@myisp.com AUTO_INSTALL_ADMIN_PASS=securepass curl -fsSL https://raw.githubusercontent.com/mauljasmay/mljnet-radius/main/auto-install-ubuntu.sh | bash
+```
+
+**Verifikasi Instalasi:**
+```bash
+# Jalankan script verifikasi setelah instalasi
+cd mljnet-radius
+./verify-installation.sh
+```
+
+**File yang dibuat:**
+- `mljnet-radius/` - Direktori aplikasi
+- `mysql_passwords.txt` - File berisi semua password yang di-generate
+
+---
+
+### ⚡ Quick Install (Interactive)
 
 Untuk instalasi cepat dan otomatis di Ubuntu 22.04:
 
