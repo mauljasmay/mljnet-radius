@@ -29,11 +29,35 @@ class SnmpService
 
     public function __construct()
     {
-        $this->enabled = config('services.snmp.enabled', false);
-        $this->community = config('services.snmp.community', 'public');
-        $this->version = config('services.snmp.version', '2c');
-        $this->timeout = config('services.snmp.timeout', 5) * 1000000;
-        $this->retries = config('services.snmp.retries', 2);
+        // Load SNMP settings from database first, fallback to config
+        $setting = \App\Models\IntegrationSetting::getByType('snmp');
+
+        if ($setting) {
+            $this->enabled = $setting->enabled;
+            $this->community = $setting->getConfig('community', config('services.snmp.community', 'public'));
+            $this->version = $setting->getConfig('version', config('services.snmp.version', '2c'));
+            $this->timeout = $setting->getConfig('timeout', config('services.snmp.timeout', 5)) * 1000000;
+            $this->retries = $setting->getConfig('retries', config('services.snmp.retries', 2));
+        } else {
+            // Fallback to config if no database setting exists
+            $this->enabled = config('services.snmp.enabled', false);
+            $this->community = config('services.snmp.community', 'public');
+            $this->version = config('services.snmp.version', '2c');
+            $this->timeout = config('services.snmp.timeout', 5) * 1000000;
+            $this->retries = config('services.snmp.retries', 2);
+        }
+    }
+
+    /**
+     * Set temporary settings for testing (used by controller)
+     */
+    public function setTestSettings($enabled, $community, $version, $timeout, $retries)
+    {
+        $this->enabled = $enabled;
+        $this->community = $community;
+        $this->version = $version;
+        $this->timeout = $timeout * 1000000; // Convert to microseconds
+        $this->retries = $retries;
     }
 
     public function isEnabled(): bool
