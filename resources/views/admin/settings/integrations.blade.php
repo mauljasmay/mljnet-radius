@@ -10,12 +10,12 @@
         <!-- Header -->
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-white">Pengaturan Integrasi</h1>
-            <p class="text-gray-400 mt-1">Kelola koneksi ke layanan eksternal (Mikrotik, RADIUS, GenieACS, WhatsApp)</p>
+            <p class="text-gray-400 mt-1">Kelola koneksi ke layanan eksternal (Mikrotik, RADIUS, GenieACS, WhatsApp, SNMP)</p>
         </div>
 
         <!-- Integration Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
+
             <!-- Mikrotik -->
             <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
                 <div class="p-6">
@@ -35,7 +35,7 @@
                             <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
                         @endif
                     </div>
-                    
+
                     @if($integrations['mikrotik'])
                         <div class="text-sm text-gray-400 mb-4">
                             <p><i class="fas fa-globe mr-2"></i>{{ $integrations['mikrotik']->getConfig('host', '-') }}:{{ $integrations['mikrotik']->getConfig('port', '-') }}</p>
@@ -53,13 +53,13 @@
                     @else
                         <p class="text-sm text-gray-500 mb-4">Belum dikonfigurasi</p>
                     @endif
-                    
+
                     <a href="{{ route('admin.settings.mikrotik') }}" class="block w-full text-center py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition">
                         <i class="fas fa-cog mr-2"></i>Konfigurasi
                     </a>
                 </div>
             </div>
-            
+
             <!-- RADIUS -->
             <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
                 <div class="p-6">
@@ -79,7 +79,7 @@
                             <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
                         @endif
                     </div>
-                    
+
                     @if($integrations['radius'])
                         <div class="text-sm text-gray-400 mb-4">
                             <p><i class="fas fa-database mr-2"></i>{{ $integrations['radius']->getConfig('host', '-') }}:{{ $integrations['radius']->getConfig('port', '-') }}</p>
@@ -97,13 +97,13 @@
                     @else
                         <p class="text-sm text-gray-500 mb-4">Belum dikonfigurasi</p>
                     @endif
-                    
+
                     <a href="{{ route('admin.settings.radius') }}" class="block w-full text-center py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition">
                         <i class="fas fa-cog mr-2"></i>Konfigurasi
                     </a>
                 </div>
             </div>
-            
+
             <!-- GenieACS -->
             <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
                 <div class="p-6">
@@ -123,7 +123,7 @@
                             <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
                         @endif
                     </div>
-                    
+
                     @if($integrations['genieacs'])
                         <div class="text-sm text-gray-400 mb-4">
                             <p><i class="fas fa-link mr-2"></i>{{ $integrations['genieacs']->getConfig('url', '-') }}</p>
@@ -141,13 +141,13 @@
                     @else
                         <p class="text-sm text-gray-500 mb-4">Belum dikonfigurasi</p>
                     @endif
-                    
+
                     <a href="{{ route('admin.settings.genieacs') }}" class="block w-full text-center py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
                         <i class="fas fa-cog mr-2"></i>Konfigurasi
                     </a>
                 </div>
             </div>
-            
+
             <!-- WhatsApp -->
             <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
                 <div class="p-6">
@@ -167,7 +167,7 @@
                             <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
                         @endif
                     </div>
-                    
+
                     @if($integrations['whatsapp'])
                         <div class="text-sm text-gray-400 mb-4">
                             <p><i class="fas fa-link mr-2"></i>{{ $integrations['whatsapp']->getConfig('api_url', '-') }}</p>
@@ -185,13 +185,13 @@
                     @else
                         <p class="text-sm text-gray-500 mb-4">Belum dikonfigurasi</p>
                     @endif
-                    
+
                     <a href="{{ route('admin.settings.whatsapp') }}" class="block w-full text-center py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition">
                         <i class="fas fa-cog mr-2"></i>Konfigurasi
                     </a>
                 </div>
             </div>
-            
+
             <!-- Midtrans -->
             <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
                 <div class="p-6">
@@ -211,15 +211,15 @@
                             <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
                         @endif
                     </div>
-                    
+
                     <p class="text-sm text-gray-500 mb-4">{{ $integrations['midtrans'] ? 'Dikonfigurasi' : 'Belum dikonfigurasi' }}</p>
-                    
+
                     <a href="{{ route('admin.settings.midtrans') }}" class="block w-full text-center py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition">
                         <i class="fas fa-cog mr-2"></i>Konfigurasi
                     </a>
                 </div>
             </div>
-            
+
             <!-- Xendit -->
             <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
                 <div class="p-6">
@@ -239,17 +239,61 @@
                             <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
                         @endif
                     </div>
-                    
+
                     <p class="text-sm text-gray-500 mb-4">{{ $integrations['xendit'] ? 'Dikonfigurasi' : 'Belum dikonfigurasi' }}</p>
-                    
+
                     <a href="{{ route('admin.settings.xendit') }}" class="block w-full text-center py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition">
                         <i class="fas fa-cog mr-2"></i>Konfigurasi
                     </a>
                 </div>
             </div>
-            
+
+            <!-- SNMP -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="h-12 w-12 bg-gradient-to-br from-teal-400 to-cyan-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">SNMP</h3>
+                                <p class="text-sm text-gray-400">Network Monitoring</p>
+                            </div>
+                        </div>
+                        @if($integrations['snmp'] && $integrations['snmp']->enabled)
+                            <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">Aktif</span>
+                        @else
+                            <span class="px-2 py-1 bg-gray-500/20 text-gray-400 text-xs rounded-full">Nonaktif</span>
+                        @endif
+                    </div>
+
+                    @if($integrations['snmp'])
+                        <div class="text-sm text-gray-400 mb-4">
+                            <p><i class="fas fa-users mr-2"></i>Community: {{ $integrations['snmp']->getConfig('community', '-') }}</p>
+                            @if($integrations['snmp']->last_tested_at)
+                                <p class="mt-1">
+                                    <i class="fas fa-clock mr-2"></i>Test: {{ $integrations['snmp']->last_tested_at->diffForHumans() }}
+                                    @if($integrations['snmp']->last_test_success)
+                                        <i class="fas fa-check-circle text-green-400 ml-1"></i>
+                                    @else
+                                        <i class="fas fa-times-circle text-red-400 ml-1"></i>
+                                    @endif
+                                </p>
+                            @endif
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500 mb-4">Belum dikonfigurasi</p>
+                    @endif
+
+                    <a href="{{ route('admin.settings.snmp') }}" class="block w-full text-center py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition">
+                        <i class="fas fa-cog mr-2"></i>Konfigurasi
+                    </a>
+                </div>
+            </div>
+
         </div>
-        
+
         <!-- Info -->
         <div class="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
             <div class="flex items-start space-x-3">

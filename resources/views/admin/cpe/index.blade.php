@@ -3,7 +3,7 @@
 @section('title', 'CPE Management')
 
 @section('content')
-<div class="min-h-screen bg-gray-100" x-data="{ sidebarOpen: false, selectedDevices: [] }">
+<div class="min-h-screen bg-gray-100" x-data="cpeManagement()">
     @include('admin.partials.sidebar')
 
     <div class="lg:pl-64">
@@ -97,10 +97,10 @@
                         </form>
 
                         <div class="flex items-center space-x-2">
-                            <button onclick="bulkRefresh()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" x-show="selectedDevices.length > 0">
+                            <button @click="bulkRefresh()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" x-show="selectedDevices.length > 0">
                                 <i class="fas fa-sync-alt mr-2"></i>Bulk Refresh
                             </button>
-                            <button onclick="bulkReboot()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition" x-show="selectedDevices.length > 0">
+                            <button @click="bulkReboot()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition" x-show="selectedDevices.length > 0">
                                 <i class="fas fa-redo mr-2"></i>Bulk Reboot
                             </button>
                         </div>
@@ -212,10 +212,10 @@
                                                 <a href="{{ route('admin.cpe.show', urlencode($device['id'])) }}" class="text-cyan-600 hover:text-cyan-800" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <button onclick="refreshDevice('{{ $device['id'] }}')" class="text-blue-600 hover:text-blue-800" title="Refresh">
+                                                <button @click="refreshDevice('{{ $device['id'] }}')" class="text-blue-600 hover:text-blue-800" title="Refresh">
                                                     <i class="fas fa-sync-alt"></i>
                                                 </button>
-                                                <button onclick="rebootDevice('{{ $device['id'] }}')" class="text-yellow-600 hover:text-yellow-800" title="Reboot">
+                                                <button @click="rebootDevice('{{ $device['id'] }}')" class="text-yellow-600 hover:text-yellow-800" title="Reboot">
                                                     <i class="fas fa-redo"></i>
                                                 </button>
                                             </div>
@@ -246,82 +246,83 @@
 
 @push('scripts')
 <script>
-// Auto refresh every 60 seconds
-setInterval(function() {
-    location.reload();
-}, 60000);
+document.addEventListener('alpine:init', () => {
+    Alpine.data('cpeManagement', () => ({
+        selectedDevices: [],
 
-function refreshDevice(deviceId) {
-    fetch(`/admin/cpe/${encodeURIComponent(deviceId)}/refresh`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-    })
-    .catch(error => alert('Error: ' + error.message));
-}
-
-function rebootDevice(deviceId) {
-    if (!confirm('Are you sure you want to reboot this device?')) return;
-    
-    fetch(`/admin/cpe/${encodeURIComponent(deviceId)}/reboot`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-    })
-    .catch(error => alert('Error: ' + error.message));
-}
-
-function bulkRefresh() {
-    const devices = Alpine.raw(Alpine.$data(document.querySelector('[x-data]')).selectedDevices);
-    if (devices.length === 0) return;
-    
-    fetch('/admin/cpe/bulk-refresh', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        refreshDevice(deviceId) {
+            fetch(`/admin/cpe/${encodeURIComponent(deviceId)}/refresh`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => alert('Error: ' + error.message));
         },
-        body: JSON.stringify({ device_ids: devices })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        location.reload();
-    });
-}
 
-function bulkReboot() {
-    if (!confirm('Are you sure you want to reboot selected devices?')) return;
-    
-    const devices = Alpine.raw(Alpine.$data(document.querySelector('[x-data]')).selectedDevices);
-    if (devices.length === 0) return;
-    
-    fetch('/admin/cpe/bulk-reboot', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        rebootDevice(deviceId) {
+            if (!confirm('Are you sure you want to reboot this device?')) return;
+
+            fetch(`/admin/cpe/${encodeURIComponent(deviceId)}/reboot`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => alert('Error: ' + error.message));
         },
-        body: JSON.stringify({ device_ids: devices })
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        location.reload();
-    });
-}
+
+        bulkRefresh() {
+            if (this.selectedDevices.length === 0) return;
+
+            fetch('/admin/cpe/bulk-refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ device_ids: this.selectedDevices })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            })
+            .catch(error => alert('Error: ' + error.message));
+        },
+
+        bulkReboot() {
+            if (!confirm('Are you sure you want to reboot selected devices?')) return;
+
+            if (this.selectedDevices.length === 0) return;
+
+            fetch('/admin/cpe/bulk-reboot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ device_ids: this.selectedDevices })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            })
+            .catch(error => alert('Error: ' + error.message));
+        }
+    }));
+});
 </script>
 @endpush
 @endsection

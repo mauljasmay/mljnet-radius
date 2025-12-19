@@ -19,6 +19,7 @@ class IntegrationSettingController extends Controller
             'radius' => IntegrationSetting::getByType('radius'),
             'genieacs' => IntegrationSetting::getByType('genieacs'),
             'whatsapp' => IntegrationSetting::getByType('whatsapp'),
+            'snmp' => IntegrationSetting::getByType('snmp'),
             'midtrans' => IntegrationSetting::getByType('midtrans'),
             'xendit' => IntegrationSetting::getByType('xendit'),
         ];
@@ -29,7 +30,10 @@ class IntegrationSettingController extends Controller
     // Mikrotik Settings
     public function mikrotik()
     {
-        $setting = IntegrationSetting::getByType('mikrotik') ?? new IntegrationSetting(['type' => 'mikrotik']);
+        $setting = IntegrationSetting::getByType('mikrotik');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'mikrotik']);
+        }
         return view('admin.settings.mikrotik', compact('setting'));
     }
 
@@ -46,7 +50,7 @@ class IntegrationSettingController extends Controller
         $setting = IntegrationSetting::updateOrCreate(
             ['type' => 'mikrotik'],
             [
-                'name' => $request->name ?? 'Mikrotik Router',
+                'name' => $request->name ? $request->name : 'Mikrotik Router',
                 'enabled' => $request->boolean('enabled'),
                 'config' => [
                     'host' => $request->host,
@@ -96,9 +100,9 @@ class IntegrationSettingController extends Controller
                     'message' => 'Koneksi berhasil!',
                     'data' => [
                         'identity' => $identity,
-                        'uptime' => $resource['uptime'] ?? '-',
-                        'version' => $resource['version'] ?? '-',
-                        'cpu_load' => $resource['cpu-load'] ?? '-',
+                        'uptime' => isset($resource['uptime']) ? $resource['uptime'] : '-',
+                        'version' => isset($resource['version']) ? $resource['version'] : '-',
+                        'cpu_load' => isset($resource['cpu-load']) ? $resource['cpu-load'] : '-',
                     ]
                 ]);
             }
@@ -124,7 +128,10 @@ class IntegrationSettingController extends Controller
     // RADIUS Settings
     public function radius()
     {
-        $setting = IntegrationSetting::getByType('radius') ?? new IntegrationSetting(['type' => 'radius']);
+        $setting = IntegrationSetting::getByType('radius');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'radius']);
+        }
         return view('admin.settings.radius', compact('setting'));
     }
 
@@ -142,7 +149,7 @@ class IntegrationSettingController extends Controller
         $setting = IntegrationSetting::updateOrCreate(
             ['type' => 'radius'],
             [
-                'name' => $request->name ?? 'FreeRADIUS Server',
+                'name' => $request->name ? $request->name : 'FreeRADIUS Server',
                 'enabled' => $request->boolean('enabled'),
                 'config' => [
                     'host' => $request->host,
@@ -150,7 +157,7 @@ class IntegrationSettingController extends Controller
                     'database' => $request->database,
                     'username' => $request->username,
                     'password' => $request->password,
-                    'nas_secret' => $request->nas_secret ?? 'testing123',
+                    'nas_secret' => $request->nas_secret ? $request->nas_secret : 'testing123',
                 ],
             ]
         );
@@ -227,7 +234,10 @@ class IntegrationSettingController extends Controller
     // GenieACS Settings
     public function genieacs()
     {
-        $setting = IntegrationSetting::getByType('genieacs') ?? new IntegrationSetting(['type' => 'genieacs']);
+        $setting = IntegrationSetting::getByType('genieacs');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'genieacs']);
+        }
         return view('admin.settings.genieacs', compact('setting'));
     }
 
@@ -241,7 +251,7 @@ class IntegrationSettingController extends Controller
         $setting = IntegrationSetting::updateOrCreate(
             ['type' => 'genieacs'],
             [
-                'name' => $request->name ?? 'GenieACS Server',
+                'name' => $request->name ? $request->name : 'GenieACS Server',
                 'enabled' => $request->boolean('enabled'),
                 'config' => [
                     'url' => rtrim($request->url, '/'),
@@ -319,7 +329,10 @@ class IntegrationSettingController extends Controller
     // WhatsApp Settings
     public function whatsapp()
     {
-        $setting = IntegrationSetting::getByType('whatsapp') ?? new IntegrationSetting(['type' => 'whatsapp']);
+        $setting = IntegrationSetting::getByType('whatsapp');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'whatsapp']);
+        }
         return view('admin.settings.whatsapp', compact('setting'));
     }
 
@@ -335,7 +348,7 @@ class IntegrationSettingController extends Controller
         $setting = IntegrationSetting::updateOrCreate(
             ['type' => 'whatsapp'],
             [
-                'name' => $request->name ?? 'WhatsApp Gateway',
+                'name' => $request->name ? $request->name : 'WhatsApp Gateway',
                 'enabled' => $request->boolean('enabled'),
                 'config' => [
                     'provider' => $request->provider,
@@ -380,7 +393,7 @@ class IntegrationSettingController extends Controller
 
             return response()->json([
                 'success' => $result['success'],
-                'message' => $result['success'] ? 'Pesan test berhasil dikirim!' : 'Gagal mengirim pesan: ' . ($result['message'] ?? 'Unknown error'),
+                'message' => $result['success'] ? 'Pesan test berhasil dikirim!' : 'Gagal mengirim pesan: ' . (isset($result['message']) ? $result['message'] : 'Unknown error'),
                 'data' => $result
             ]);
 
@@ -395,7 +408,10 @@ class IntegrationSettingController extends Controller
     // Midtrans Settings
     public function midtrans()
     {
-        $setting = IntegrationSetting::getByType('midtrans') ?? new IntegrationSetting(['type' => 'midtrans']);
+        $setting = IntegrationSetting::getByType('midtrans');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'midtrans']);
+        }
         return view('admin.settings.midtrans', compact('setting'));
     }
 
@@ -423,10 +439,106 @@ class IntegrationSettingController extends Controller
         return back()->with('success', 'Konfigurasi Midtrans berhasil disimpan');
     }
 
+    // SNMP Settings
+    public function snmp()
+    {
+        $setting = IntegrationSetting::getByType('snmp');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'snmp']);
+        }
+        return view('admin.settings.snmp', compact('setting'));
+    }
+
+    public function saveSnmp(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'community' => 'required|string',
+            'version' => 'required|in:1,2c,3',
+            'timeout' => 'required|integer|min:1|max:30',
+            'retries' => 'required|integer|min:0|max:10',
+        ]);
+
+        $setting = IntegrationSetting::updateOrCreate(
+            ['type' => 'snmp'],
+            [
+                'name' => $request->name ? $request->name : 'SNMP Network Monitoring',
+                'enabled' => $request->boolean('enabled'),
+                'config' => [
+                    'community' => $request->community,
+                    'version' => $request->version,
+                    'timeout' => (int) $request->timeout,
+                    'retries' => (int) $request->retries,
+                    'default_host' => $request->default_host,
+                ],
+            ]
+        );
+
+        return back()->with('success', 'Konfigurasi SNMP berhasil disimpan');
+    }
+
+    public function testSnmp(Request $request)
+    {
+        $request->validate([
+            'community' => 'required|string',
+            'version' => 'required|in:1,2c,3',
+            'timeout' => 'required|integer|min:1|max:30',
+            'retries' => 'required|integer|min:0|max:10',
+            'test_host' => 'required|string',
+        ]);
+
+        try {
+            // Create SNMP service instance with test settings
+            $snmpService = new \App\Services\SnmpService();
+            $snmpService->setTestSettings(true, $request->community, $request->version, $request->timeout, $request->retries);
+
+            if (!$snmpService->isEnabled()) {
+                throw new \Exception('SNMP extension not loaded or not enabled');
+            }
+
+            $pingResult = $snmpService->ping($request->test_host);
+            $systemInfo = $snmpService->getSystemInfo($request->test_host);
+
+            if (!$pingResult) {
+                throw new \Exception('Unable to ping device via SNMP');
+            }
+
+            // Update test result
+            $setting = IntegrationSetting::getByType('snmp');
+            if ($setting) {
+                $deviceName = isset($systemInfo['name']) ? $systemInfo['name'] : $request->test_host;
+                $setting->updateTestResult(true, "Connected to: {$deviceName}");
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Koneksi SNMP berhasil!',
+                'data' => [
+                    'system_info' => $systemInfo,
+                    'ping_success' => $pingResult,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            $setting = IntegrationSetting::getByType('snmp');
+            if ($setting) {
+                $setting->updateTestResult(false, $e->getMessage());
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     // Xendit Settings
     public function xendit()
     {
-        $setting = IntegrationSetting::getByType('xendit') ?? new IntegrationSetting(['type' => 'xendit']);
+        $setting = IntegrationSetting::getByType('xendit');
+        if (!$setting) {
+            $setting = new IntegrationSetting(['type' => 'xendit']);
+        }
         return view('admin.settings.xendit', compact('setting'));
     }
 

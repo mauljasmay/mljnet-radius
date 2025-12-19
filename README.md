@@ -494,11 +494,41 @@ php -d memory_limit=-1 /usr/local/bin/composer install
 
 ### 📊 Verifikasi Instalasi
 
+#### Menggunakan Script Verifikasi Otomatis
+
+Setelah instalasi selesai, jalankan script verifikasi untuk memastikan semua komponen terinstall dengan benar:
+
+```bash
+# Jalankan script verifikasi
+cd mljnet-radius
+./verify-installation.sh
+```
+
+**Script verifikasi akan memeriksa:**
+- ✅ **PHP 8.2+** dengan ekstensi yang dibutuhkan (mysql, xml, mbstring, curl, zip, bcmath, gd, intl, tokenizer, fileinfo)
+- ✅ **MySQL service** berjalan dan koneksi database berhasil
+- ✅ **Node.js 18+** dan npm terinstall
+- ✅ **Composer** terinstall
+- ✅ **Laravel application** terkonfigurasi dengan benar
+- ✅ **Project dependencies** (vendor/ dan node_modules/) terinstall
+- ✅ **Database migrations** dan seeders telah dijalankan
+- ✅ **Frontend assets** dikompilasi (public/build/)
+
+#### Verifikasi Manual
+
+Jika lebih suka verifikasi manual:
+
 1. **Buka browser** dan akses `http://localhost:8000`
 2. **Login admin** dengan:
    - Email: `admin@gembok.com`
    - Password: `admin123`
 3. **Dashboard** harus muncul dengan data sample
+4. **Periksa komponen sistem**:
+   - Jalankan `php --version` (harus 8.2+)
+   - Jalankan `composer --version`
+   - Jalankan `node --version` dan `npm --version`
+   - Jalankan `sudo systemctl status mysql` (harus active)
+   - Jalankan `php artisan --version` (dalam direktori project)
 
 ### 🔄 Update Project
 

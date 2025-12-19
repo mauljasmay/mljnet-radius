@@ -154,6 +154,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/reminder/{invoice}', [\App\Http\Controllers\Admin\WhatsAppController::class, 'sendReminder'])->name('reminder');
             Route::post('/bulk-invoice', [\App\Http\Controllers\Admin\WhatsAppController::class, 'bulkSendInvoice'])->name('bulk.invoice');
             Route::post('/bulk-reminder', [\App\Http\Controllers\Admin\WhatsAppController::class, 'bulkSendReminder'])->name('bulk.reminder');
+
+            // WhatsApp Templates
+            Route::resource('templates', \App\Http\Controllers\Admin\WhatsAppTemplateController::class);
+            Route::post('/templates/{template}/toggle', [\App\Http\Controllers\Admin\WhatsAppTemplateController::class, 'toggle'])->name('templates.toggle');
+            Route::post('/templates/{template}/set-default', [\App\Http\Controllers\Admin\WhatsAppTemplateController::class, 'setDefault'])->name('templates.set-default');
+            Route::post('/templates/preview', [\App\Http\Controllers\Admin\WhatsAppTemplateController::class, 'preview'])->name('templates.preview');
         });
         
         // Payment Gateway
@@ -249,6 +255,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/midtrans', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'midtrans'])->name('midtrans');
             Route::post('/midtrans', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'saveMidtrans'])->name('midtrans.save');
             
+            // SNMP
+            Route::get('/snmp', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'snmp'])->name('snmp');
+            Route::post('/snmp', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'saveSnmp'])->name('snmp.save');
+            Route::post('/snmp/test', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'testSnmp'])->name('snmp.test');
+
             // Xendit
             Route::get('/xendit', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'xendit'])->name('xendit');
             Route::post('/xendit', [\App\Http\Controllers\Admin\IntegrationSettingController::class, 'saveXendit'])->name('xendit.save');

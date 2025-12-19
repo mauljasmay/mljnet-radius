@@ -23,15 +23,16 @@ class WhatsAppController extends Controller
      */
     public function index()
     {
+        $setting = \App\Models\IntegrationSetting::whatsapp();
         $status = $this->whatsapp->checkStatus();
         $connected = $status && isset($status['connected']) && $status['connected'] === true;
-        
+
         // Get recent logs for dashboard
         $recentLogs = WhatsappLog::with(['customer', 'invoice'])
             ->latest()
             ->take(5)
             ->get();
-        
+
         // Get stats
         $stats = [
             'total' => WhatsappLog::count(),
@@ -39,8 +40,9 @@ class WhatsAppController extends Controller
             'failed' => WhatsappLog::where('status', 'failed')->count(),
             'today' => WhatsappLog::whereDate('created_at', today())->count(),
         ];
-        
+
         return view('admin.whatsapp.index', [
+            'setting' => $setting,
             'connected' => $connected,
             'status' => $status,
             'recentLogs' => $recentLogs,

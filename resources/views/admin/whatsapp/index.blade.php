@@ -17,10 +17,20 @@
                     <p class="text-gray-600 mt-1">Kelola notifikasi WhatsApp</p>
                 </div>
                 <div>
-                    <span id="connection-status" class="px-4 py-2 rounded-lg text-sm font-medium {{ $connected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                        <i class="fas fa-{{ $connected ? 'check-circle' : 'times-circle' }} mr-2"></i>
-                        {{ $connected ? 'Connected' : 'Disconnected' }}
-                    </span>
+                    @if($setting && $setting->last_tested_at)
+                        <div class="text-right">
+                            <span class="px-4 py-2 rounded-lg text-sm font-medium {{ $setting->last_test_success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                <i class="fas fa-{{ $setting->last_test_success ? 'check-circle' : 'times-circle' }} mr-2"></i>
+                                {{ $setting->last_test_success ? 'Connected' : 'Disconnected' }}
+                            </span>
+                            <p class="text-xs text-gray-500 mt-1">Test terakhir: {{ $setting->last_tested_at->format('d/m/Y H:i') }}</p>
+                        </div>
+                    @else
+                        <span class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-800">
+                            <i class="fas fa-question-circle mr-2"></i>
+                            Belum ditest
+                        </span>
+                    @endif
                 </div>
             </div>
 
@@ -48,7 +58,7 @@
                                 <textarea name="message" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" placeholder="Tulis pesan..." required></textarea>
                                 <p class="text-xs text-gray-500 mt-1">Gunakan *text* untuk bold, _text_ untuk italic</p>
                             </div>
-                            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition {{ !$connected ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$connected ? 'disabled' : '' }}>
+                            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition {{ (!$setting || !$setting->enabled || ($setting->last_tested_at && !$setting->last_test_success)) ? 'opacity-50 cursor-not-allowed' : '' }}" {{ (!$setting || !$setting->enabled || ($setting->last_tested_at && !$setting->last_test_success)) ? 'disabled' : '' }}>
                                 <i class="fab fa-whatsapp mr-2"></i>Kirim Pesan
                             </button>
                         </form>
@@ -263,20 +273,28 @@ Tagihan belum dibayar:
                         <table class="w-full">
                             <tbody class="divide-y divide-gray-200">
                                 <tr>
-                                    <td class="py-3 font-medium text-gray-700 w-48">API URL</td>
-                                    <td class="py-3"><code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ config('services.whatsapp.api_url') ?: 'Not configured' }}</code></td>
+                                    <td class="py-3 font-medium text-gray-700 w-48">Provider</td>
+                                    <td class="py-3"><code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ $setting ? ucfirst($setting->getConfig('provider', 'Not configured')) : 'Not configured' }}</code></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-medium text-gray-700">API URL</td>
+                                    <td class="py-3"><code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ $setting ? $setting->getConfig('api_url', 'Not configured') : 'Not configured' }}</code></td>
                                 </tr>
                                 <tr>
                                     <td class="py-3 font-medium text-gray-700">Sender Number</td>
-                                    <td class="py-3"><code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ config('services.whatsapp.sender') ?: 'Not configured' }}</code></td>
+                                    <td class="py-3"><code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ $setting ? $setting->getConfig('sender', 'Not configured') : 'Not configured' }}</code></td>
                                 </tr>
                                 <tr>
                                     <td class="py-3 font-medium text-gray-700">Status</td>
                                     <td class="py-3">
-                                        @if($connected)
-                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Connected</span>
+                                        @if($setting && $setting->last_tested_at)
+                                            @if($setting->last_test_success)
+                                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Connected</span>
+                                            @else
+                                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">Disconnected</span>
+                                            @endif
                                         @else
-                                        <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">Disconnected</span>
+                                            <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">Belum ditest</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -286,7 +304,7 @@ Tagihan belum dibayar:
                     <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <p class="text-sm text-blue-800">
                             <i class="fas fa-info-circle mr-2"></i>
-                            Konfigurasi WhatsApp Gateway dapat diubah di file <code class="bg-blue-100 px-1 rounded">.env</code>
+                            Konfigurasi WhatsApp Gateway dapat diubah di <a href="{{ route('admin.settings.whatsapp') }}" class="text-blue-600 hover:text-blue-800 underline">halaman integrasi</a>
                         </p>
                     </div>
                 </div>

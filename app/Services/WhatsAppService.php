@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\IntegrationSetting;
 use App\Models\WhatsappLog;
+use App\Models\WhatsAppTemplate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -17,12 +18,21 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->setting = IntegrationSetting::whatsapp();
-        if ($this->setting && $this->setting->isActive()) {
-            $this->provider = $this->setting->getConfig('provider');
-            $this->apiUrl = $this->setting->getConfig('api_url');
-            $this->apiKey = $this->setting->getConfig('api_key');
-            $this->sender = $this->setting->getConfig('sender');
+        try {
+            $this->setting = IntegrationSetting::whatsapp();
+            if ($this->setting && $this->setting->isActive()) {
+                $this->provider = $this->setting->getConfig('provider');
+                $this->apiUrl = $this->setting->getConfig('api_url');
+                $this->apiKey = $this->setting->getConfig('api_key');
+                $this->sender = $this->setting->getConfig('sender');
+            }
+        } catch (\Exception $e) {
+            // Table might not exist yet during migrations
+            $this->setting = null;
+            $this->provider = null;
+            $this->apiUrl = null;
+            $this->apiKey = null;
+            $this->sender = null;
         }
     }
 
@@ -452,15 +462,30 @@ class WhatsAppService
      */
     public function sendInvoiceNotification($customer, $invoice)
     {
-        $message = "Halo *{$customer->name}*,\n\n";
-        $message .= "Tagihan internet Anda telah terbit:\n\n";
-        $message .= "📋 *Invoice:* {$invoice->invoice_number}\n";
-        $message .= "📦 *Paket:* {$invoice->package->name}\n";
-        $message .= "💰 *Total:* Rp " . number_format($invoice->amount, 0, ',', '.') . "\n";
-        $message .= "📅 *Jatuh Tempo:* " . ($invoice->due_date ? $invoice->due_date->format('d M Y') : '-') . "\n\n";
-        $message .= "Silakan lakukan pembayaran sebelum jatuh tempo.\n\n";
-        $message .= "Terima kasih,\n";
-        $message .= "*" . config('app.name') . "*";
+        $template = WhatsAppTemplate::getDefaultForType('invoice');
+
+        if ($template) {
+            $data = [
+                'nama' => $customer->name,
+                'invoice' => $invoice->invoice_number,
+                'paket' => $invoice->package->name ?? '-',
+                'amount' => number_format($invoice->amount, 0, ',', '.'),
+                'due_date' => $invoice->due_date ? $invoice->due_date->format('d M Y') : '-',
+                'app_name' => config('app.name'),
+            ];
+            $message = $template->render($data);
+        } else {
+            // Fallback to hardcoded message if no template exists
+            $message = "Halo *{$customer->name}*,\n\n";
+            $message .= "Tagihan internet Anda telah terbit:\n\n";
+            $message .= "📋 *Invoice:* {$invoice->invoice_number}\n";
+            $message .= "📦 *Paket:* {$invoice->package->name}\n";
+            $message .= "💰 *Total:* Rp " . number_format($invoice->amount, 0, ',', '.') . "\n";
+            $message .= "📅 *Jatuh Tempo:* " . ($invoice->due_date ? $invoice->due_date->format('d M Y') : '-') . "\n\n";
+            $message .= "Silakan lakukan pembayaran sebelum jatuh tempo.\n\n";
+            $message .= "Terima kasih,\n";
+            $message .= "*" . config('app.name') . "*";
+        }
 
         $result = $this->send($customer->phone, $message);
         $this->logMessage($customer->phone, 'invoice', $message, $result, $customer->id, $invoice->id);
@@ -512,14 +537,28 @@ class WhatsAppService
      */
     public function sendPaymentReminder($customer, $invoice)
     {
-        $message = "⚠️ *Pengingat Pembayaran*\n\n";
-        $message .= "Halo *{$customer->name}*,\n\n";
-        $message .= "Tagihan Anda belum dibayar:\n\n";
-        $message .= "📋 *Invoice:* {$invoice->invoice_number}\n";
-        $message .= "💰 *Total:* Rp " . number_format($invoice->amount, 0, ',', '.') . "\n";
-        $message .= "📅 *Jatuh Tempo:* " . ($invoice->due_date ? $invoice->due_date->format('d M Y') : '-') . "\n\n";
-        $message .= "Mohon segera lakukan pembayaran untuk menghindari pemutusan layanan.\n\n";
-        $message .= "*" . config('app.name') . "*";
+        $template = WhatsAppTemplate::getDefaultForType('reminder');
+
+        if ($template) {
+            $data = [
+                'nama' => $customer->name,
+                'invoice' => $invoice->invoice_number,
+                'amount' => number_format($invoice->amount, 0, ',', '.'),
+                'due_date' => $invoice->due_date ? $invoice->due_date->format('d M Y') : '-',
+                'app_name' => config('app.name'),
+            ];
+            $message = $template->render($data);
+        } else {
+            // Fallback to hardcoded message if no template exists
+            $message = "⚠️ *Pengingat Pembayaran*\n\n";
+            $message .= "Halo *{$customer->name}*,\n\n";
+            $message .= "Tagihan Anda belum dibayar:\n\n";
+            $message .= "📋 *Invoice:* {$invoice->invoice_number}\n";
+            $message .= "💰 *Total:* Rp " . number_format($invoice->amount, 0, ',', '.') . "\n";
+            $message .= "📅 *Jatuh Tempo:* " . ($invoice->due_date ? $invoice->due_date->format('d M Y') : '-') . "\n\n";
+            $message .= "Mohon segera lakukan pembayaran untuk menghindari pemutusan layanan.\n\n";
+            $message .= "*" . config('app.name') . "*";
+        }
 
         $result = $this->send($customer->phone, $message);
         $this->logMessage($customer->phone, 'reminder', $message, $result, $customer->id, $invoice->id);
@@ -531,11 +570,22 @@ class WhatsAppService
      */
     public function sendSuspensionNotice($customer)
     {
-        $message = "🚫 *Pemberitahuan Penangguhan Layanan*\n\n";
-        $message .= "Halo *{$customer->name}*,\n\n";
-        $message .= "Layanan internet Anda telah ditangguhkan karena tunggakan pembayaran.\n\n";
-        $message .= "Silakan hubungi kami atau lakukan pembayaran untuk mengaktifkan kembali layanan Anda.\n\n";
-        $message .= "*" . config('app.name') . "*";
+        $template = WhatsAppTemplate::getDefaultForType('suspension');
+
+        if ($template) {
+            $data = [
+                'nama' => $customer->name,
+                'app_name' => config('app.name'),
+            ];
+            $message = $template->render($data);
+        } else {
+            // Fallback to hardcoded message if no template exists
+            $message = "🚫 *Pemberitahuan Penangguhan Layanan*\n\n";
+            $message .= "Halo *{$customer->name}*,\n\n";
+            $message .= "Layanan internet Anda telah ditangguhkan karena tunggakan pembayaran.\n\n";
+            $message .= "Silakan hubungi kami atau lakukan pembayaran untuk mengaktifkan kembali layanan Anda.\n\n";
+            $message .= "*" . config('app.name') . "*";
+        }
 
         $result = $this->send($customer->phone, $message);
         $this->logMessage($customer->phone, 'suspension', $message, $result, $customer->id);
