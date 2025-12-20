@@ -127,6 +127,9 @@ install_mysql() {
     # Check if MySQL is already installed
     if command -v mysql &> /dev/null; then
         log_warning "MySQL is already installed. Skipping installation."
+        # Generate passwords anyway for consistency
+        DB_PASS=$(openssl rand -base64 12)
+        MYSQL_ROOT_PASS=$(openssl rand -base64 12)
         return 0
     fi
 
@@ -134,43 +137,24 @@ install_mysql() {
     DB_PASS=$(openssl rand -base64 12)
     MYSQL_ROOT_PASS=$(openssl rand -base64 12)
 
-    # Save passwords to a file for reference
-    echo "MySQL Root Password: $MYSQL_ROOT_PASS" > mysql_passwords.txt
-    echo "Database Password: $DB_PASS" >> mysql_passwords.txt
-    echo "Database User: $DB_USER" >> mysql_passwords.txt
-    echo "Database Name: $DB_NAME" >> mysql_passwords.txt
-    echo "Application URL: $APP_URL" >> mysql_passwords.txt
-    echo "Admin Email: $ADMIN_EMAIL" >> mysql_passwords.txt
-    echo "Admin Password: $ADMIN_PASS" >> mysql_passwords.txt
-    log_info "Passwords saved to mysql_passwords.txt"
+    # Pre-configure MySQL root password using debconf
+    echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASS" | sudo debconf-set-selections
+    echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASS" | sudo debconf-set-selections
 
     # Install MySQL
     sudo apt install -y mysql-server
 
-    # Stop MySQL service temporarily
-    sudo systemctl stop mysql
+    # Ensure MySQL is running
+    sudo systemctl start mysql
+    sudo systemctl enable mysql
 
-    # Start MySQL in safe mode to set root password
-    sudo mysqld_safe --skip-grant-tables --skip-networking &
-    sleep 5
-
-    # Set root password and create database/user
-    sudo mysql -u root << EOF
-FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASS';
+    # Create database and user
+    mysql -u root -p"$MYSQL_ROOT_PASS" << EOF
 CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
 GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
 FLUSH PRIVILEGES;
 EOF
-
-    # Stop the safe mode MySQL
-    sudo pkill mysqld
-    sleep 2
-
-    # Start MySQL service normally
-    sudo systemctl start mysql
-    sudo systemctl enable mysql
 
     # Test connection
     if mysql -u "$DB_USER" -p"$DB_PASS" -e "SELECT 1;" &> /dev/null; then
@@ -213,6 +197,16 @@ clone_project() {
     git clone https://github.com/mauljasmay/mljnet-radius.git "$APP_NAME"
     cd "$APP_NAME"
 
+    # Save passwords to project directory
+    echo "MySQL Root Password: $MYSQL_ROOT_PASS" > mysql_passwords.txt
+    echo "Database Password: $DB_PASS" >> mysql_passwords.txt
+    echo "Database User: $DB_USER" >> mysql_passwords.txt
+    echo "Database Name: $DB_NAME" >> mysql_passwords.txt
+    echo "Application URL: $APP_URL" >> mysql_passwords.txt
+    echo "Admin Email: $ADMIN_EMAIL" >> mysql_passwords.txt
+    echo "Admin Password: $ADMIN_PASS" >> mysql_passwords.txt
+    log_info "Passwords saved to $APP_NAME/mysql_passwords.txt"
+
     log_success "Project cloned successfully"
 }
 
@@ -232,17 +226,23 @@ setup_environment() {
     # Generate application key
     php artisan key:generate
 
-    # Update .env file with proper escaping
-    sed -i "s|APP_NAME=.*|APP_NAME=\"MLJ Net\"|" .env
-    sed -i "s|APP_ENV=.*|APP_ENV=production|" .env
-    sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|" .env
-    sed -i "s|APP_URL=.*|APP_URL=\"$APP_URL\"|" .env
-    sed -i "s|DB_CONNECTION=.*|DB_CONNECTION=mysql|" .env
-    sed -i "s|DB_HOST=.*|DB_HOST=127.0.0.1|" .env
-    sed -i "s|DB_PORT=.*|DB_PORT=3306|" .env
-    sed -i "s|DB_DATABASE=.*|DB_DATABASE=\"$DB_NAME\"|" .env
-    sed -i "s|DB_USERNAME=.*|DB_USERNAME=\"$DB_USER\"|" .env
-    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=\"$DB_PASS\"|" .env
+    # Update .env file using a more robust method
+    # Escape special characters for sed
+    APP_URL_ESCAPED=$(printf '%s\n' "$APP_URL" | sed 's/[[\.*^$()+?{|]/\\&/g')
+    DB_NAME_ESCAPED=$(printf '%s\n' "$DB_NAME" | sed 's/[[\.*^$()+?{|]/\\&/g')
+    DB_USER_ESCAPED=$(printf '%s\n' "$DB_USER" | sed 's/[[\.*^$()+?{|]/\\&/g')
+    DB_PASS_ESCAPED=$(printf '%s\n' "$DB_PASS" | sed 's/[[\.*^$()+?{|]/\\&/g')
+
+    sed -i "s|^APP_NAME=.*|APP_NAME=\"MLJ Net\"|" .env
+    sed -i "s|^APP_ENV=.*|APP_ENV=production|" .env
+    sed -i "s|^APP_DEBUG=.*|APP_DEBUG=false|" .env
+    sed -i "s|^APP_URL=.*|APP_URL=\"$APP_URL_ESCAPED\"|" .env
+    sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=mysql|" .env
+    sed -i "s|^DB_HOST=.*|DB_HOST=127.0.0.1|" .env
+    sed -i "s|^DB_PORT=.*|DB_PORT=3306|" .env
+    sed -i "s|^DB_DATABASE=.*|DB_DATABASE=\"$DB_NAME_ESCAPED\"|" .env
+    sed -i "s|^DB_USERNAME=.*|DB_USERNAME=\"$DB_USER_ESCAPED\"|" .env
+    sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=\"$DB_PASS_ESCAPED\"|" .env
 
     log_success "Environment configured"
 }
