@@ -17,12 +17,27 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->setting = IntegrationSetting::whatsapp();
-        if ($this->setting && $this->setting->isActive()) {
-            $this->provider = $this->setting->getConfig('provider');
-            $this->apiUrl = $this->setting->getConfig('api_url');
-            $this->apiKey = $this->setting->getConfig('api_key');
-            $this->sender = $this->setting->getConfig('sender');
+        // Lazy load settings to avoid database queries during package discovery
+        $this->setting = null;
+        $this->provider = null;
+        $this->apiUrl = null;
+        $this->apiKey = null;
+        $this->sender = null;
+    }
+
+    /**
+     * Load WhatsApp settings from database
+     */
+    private function loadSettings()
+    {
+        if ($this->setting === null) {
+            $this->setting = IntegrationSetting::whatsapp();
+            if ($this->setting && $this->setting->isActive()) {
+                $this->provider = $this->setting->getConfig('provider');
+                $this->apiUrl = $this->setting->getConfig('api_url');
+                $this->apiKey = $this->setting->getConfig('api_key');
+                $this->sender = $this->setting->getConfig('sender');
+            }
         }
     }
 
@@ -586,6 +601,8 @@ class WhatsAppService
      */
     public function checkStatus()
     {
+        $this->loadSettings();
+
         if (!$this->setting || !$this->setting->isActive()) {
             return [
                 'connected' => false,

@@ -132,4 +132,47 @@ class DashboardController extends Controller
 
         return back()->with('success', 'Password berhasil diubah');
     }
+
+    public function projectUpdates()
+    {
+        // Get current version from composer.json or AppSetting
+        $composerJson = json_decode(file_get_contents(base_path('composer.json')), true);
+        $currentVersion = $composerJson['version'] ?? '1.0.0';
+
+        // Sample update history (in a real app, this could come from a database or changelog file)
+        $updates = [
+            [
+                'version' => '1.2.0',
+                'date' => 'Dec 15, 2024',
+                'changes' => [
+                    'Added project updates menu in admin',
+                    'Improved version management',
+                    'Enhanced admin dashboard',
+                    'Added GitHub integration for version updates'
+                ]
+            ],
+            [
+                'version' => '1.1.0',
+                'date' => 'Dec 10, 2024',
+                'changes' => [
+                    'Added voucher system',
+                    'Implemented payment gateway integration',
+                    'Enhanced customer management',
+                    'Added WhatsApp notifications'
+                ]
+            ],
+            [
+                'version' => '1.0.0',
+                'date' => 'Dec 1, 2024',
+                'changes' => [
+                    'Initial release',
+                    'Basic ISP management features',
+                    'Customer, package, and invoice management',
+                    'Admin dashboard setup'
+                ]
+            ]
+        ];
+
+        return view('admin.project-updates', compact('currentVersion', 'updates'));
+    }
 }

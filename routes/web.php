@@ -117,6 +117,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Change Password
         Route::get('/change-password', [DashboardController::class, 'changePassword'])->name('change-password');
         Route::post('/change-password', [DashboardController::class, 'updatePassword'])->name('change-password.update');
+
+        // Project Updates
+        Route::get('/project-updates', [DashboardController::class, 'projectUpdates'])->name('project-updates');
         
         // Mikrotik Management
         Route::prefix('mikrotik')->name('mikrotik.')->group(function () {
@@ -339,9 +342,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
 
 // Public Voucher Purchase
 Route::prefix('voucher')->name('voucher.')->group(function () {
-    Route::get('/buy', function () {
-        return view('voucher.buy');
-    })->name('buy');
+    Route::get('/buy', [VoucherController::class, 'buy'])->name('buy');
     Route::post('/purchase', [VoucherController::class, 'purchase'])->name('purchase');
     Route::get('/success/{id}', [VoucherController::class, 'success'])->name('success');
 });

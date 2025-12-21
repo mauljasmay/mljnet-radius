@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -14,18 +12,22 @@ services:
     networks:
       - gembok-network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   nginx:
     image: nginx:alpine
     container_name: gembok-nginx
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/ssl:/etc/ssl/certs
     networks:
       - gembok-network
     depends_on:
@@ -46,6 +48,10 @@ services:
       - gembok-db-data:/var/lib/mysql
     networks:
       - gembok-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   redis:
     image: redis:alpine

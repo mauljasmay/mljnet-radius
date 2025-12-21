@@ -26,6 +26,21 @@ APP_URL="${AUTO_INSTALL_APP_URL:-http://localhost:8000}"
 ADMIN_EMAIL="${AUTO_INSTALL_ADMIN_EMAIL:-admin@gembok.com}"
 ADMIN_PASS="${AUTO_INSTALL_ADMIN_PASS:-admin123}"
 
+# Determine if we need to use sudo
+USE_SUDO=true
+if [[ $EUID -eq 0 ]]; then
+    USE_SUDO=false
+fi
+
+# Function to run commands with sudo if needed
+run_cmd() {
+    if [[ "$USE_SUDO" == "true" ]]; then
+        sudo "$@"
+    else
+        "$@"
+    fi
+}
+
 # Functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -49,13 +64,13 @@ log_step() {
 
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        log_error "This script should not be run as root. Please run as a regular user with sudo access."
-        exit 1
+        log_info "Running as root - sudo not required"
+        return 0
     fi
 
     # Check if sudo is available
     if ! command -v sudo &> /dev/null; then
-        log_error "sudo is required but not installed. Please install sudo first."
+        log_error "sudo is required but not installed. Please install sudo first or run as root."
         exit 1
     fi
 }
@@ -95,24 +110,24 @@ check_os() {
 
 update_system() {
     log_step "1/12 Updating system packages..."
-    sudo apt update && sudo apt upgrade -y
+    run_cmd apt update && run_cmd apt upgrade -y
     log_success "System updated"
 }
 
 install_basic_deps() {
     log_step "2/12 Installing basic dependencies..."
-    sudo apt install -y software-properties-common curl wget git unzip ufw
+    run_cmd apt install -y software-properties-common curl wget git unzip ufw
     log_success "Basic dependencies installed"
 }
 
 install_php() {
     log_step "3/12 Installing PHP 8.2 and extensions..."
     # Add PHP repository
-    sudo add-apt-repository ppa:ondrej/php -y
-    sudo apt update
+    run_cmd add-apt-repository ppa:ondrej/php -y
+    run_cmd apt update
 
     # Install PHP 8.2 and required extensions
-    sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-mysql \
+    run_cmd apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-mysql \
     php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-bcmath \
     php8.2-gd php8.2-intl php8.2-tokenizer php8.2-fileinfo
 
@@ -138,15 +153,15 @@ install_mysql() {
     MYSQL_ROOT_PASS=$(openssl rand -base64 12)
 
     # Pre-configure MySQL root password using debconf
-    echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASS" | sudo debconf-set-selections
-    echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASS" | sudo debconf-set-selections
+    echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASS" | run_cmd debconf-set-selections
+    echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASS" | run_cmd debconf-set-selections
 
     # Install MySQL
-    sudo apt install -y mysql-server
+    run_cmd apt install -y mysql-server
 
     # Ensure MySQL is running
-    sudo systemctl start mysql
-    sudo systemctl enable mysql
+    run_cmd systemctl start mysql
+    run_cmd systemctl enable mysql
 
     # Create database and user
     mysql -u root -p"$MYSQL_ROOT_PASS" << EOF
@@ -180,8 +195,8 @@ install_composer() {
     log_step "6/12 Installing Composer..."
     # Download and install Composer
     curl -sS https://getcomposer.org/installer | php
-    sudo mv composer.phar /usr/local/bin/composer
-    sudo chmod +x /usr/local/bin/composer
+    run_cmd mv composer.phar /usr/local/bin/composer
+    run_cmd chmod +x /usr/local/bin/composer
 
     COMPOSER_VERSION=$(composer --version | head -n 1)
     log_success "$COMPOSER_VERSION installed"
@@ -285,10 +300,10 @@ setup_permissions() {
     cd "$APP_NAME"
 
     # Set proper permissions
-    sudo chown -R www-data:www-data storage/
-    sudo chown -R www-data:www-data bootstrap/cache/
-    sudo chmod -R 775 storage/
-    sudo chmod -R 775 bootstrap/cache/
+    run_cmd chown -R www-data:www-data storage/
+    run_cmd chown -R www-data:www-data bootstrap/cache/
+    run_cmd chmod -R 775 storage/
+    run_cmd chmod -R 775 bootstrap/cache/
 
     log_success "Permissions configured"
 }
