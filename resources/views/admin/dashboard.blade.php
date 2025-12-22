@@ -14,6 +14,31 @@
 
         <!-- Dashboard Content -->
         <div class="p-6">
+            <!-- Update Toast Notification -->
+            @if($updateAvailable)
+            <div id="updateToast" class="mb-6 bg-cyan-50 border border-cyan-200 rounded-lg p-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-cyan-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-cyan-800">Update Available</h3>
+                        <div class="mt-2 text-sm text-cyan-700">
+                            <p>A new version of the application is available. Update now to get the latest features and improvements.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{{ route('admin.project-updates') }}" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>Update Now
+                    </a>
+                    <button onclick="dismissUpdateToast()" class="text-cyan-600 hover:text-cyan-800 text-sm font-medium">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            @endif
+
             <!-- Welcome Section -->
             <div class="mb-6">
                 <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -575,6 +600,14 @@
         }
     } catch (error) {
         console.error('Error initializing invoice chart:', error);
+    }
+
+    // Update Toast Dismissal
+    function dismissUpdateToast() {
+        const toast = document.getElementById('updateToast');
+        if (toast) {
+            toast.style.display = 'none';
+        }
     }
 </script>
 @endpush

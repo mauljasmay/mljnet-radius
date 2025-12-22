@@ -1,9 +1,16 @@
-# TODO: Change Docker port from 8080 to 80/443
+# Auto-Update Feature Implementation
 
-## Steps to Complete
-- [x] Update docker-compose.yml: Change ports to "80:80" and "443:443", remove obsolete version
-- [x] Update Dockerfile: Add command to generate self-signed SSL certificates for development
-- [x] Update docker/nginx/default.conf: Add server block for port 443 with SSL configuration
-- [ ] Start Docker Desktop (if not running)
-- [ ] Run `docker-compose up --build` to restart containers with new configuration
-- [ ] Test access via http://localhost (port 80) and https://localhost (port 443, accept self-signed certificate)
+## Overview
+Add auto-update functionality via GitHub that checks for new tags, shows toast notifications on admin dashboard, and allows manual triggering of updates with auto-install and setup.
+
+## Steps
+- [x] Create GitHubUpdateService to fetch latest tag from GitHub API
+- [x] Add GitHub repo URL setting in AppSetting
+- [x] Modify DashboardController to check for updates on index() and projectUpdates()
+- [x] Update admin dashboard view to show update notification/toast if new version available
+- [x] Add update button to project-updates page
+- [x] Create route for triggering update
+- [x] Implement update logic: git pull, composer install, npm install, migrate, etc.
+- [x] Add auto-setup after update
+- [x] Test the update process
+- [x] Set up GitHub repository URL in .env file (GITHUB_REPO_URL=https://github.com/mauljasmay/mljnet-radius)
