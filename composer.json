@@ -2,9 +2,10 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "MLJNET RADIUS - Internet Service Provider Management System",
+    "keywords": ["laravel", "framework", "isp", "radius", "network"],
     "license": "MIT",
+    "version": "1.2.0",
     "require": {
         "php": "^8.2",
         "evilfreelancer/routeros-api-php": "^1.6",

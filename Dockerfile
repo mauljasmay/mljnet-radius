@@ -1,9 +1,5 @@
 FROM php:8.3-fpm
 
-# Arguments
-ARG user=gembok
-ARG uid=1000
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
@@ -29,11 +25,6 @@ RUN pecl install redis && docker-php-ext-enable redis
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create system user
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
-
 # Set working directory
 WORKDIR /var/www
 
@@ -42,9 +33,21 @@ COPY . /var/www
 
 # Create vendor directory and set permissions
 RUN mkdir -p /var/www/vendor /var/www/storage /var/www/bootstrap/cache && \
-    chown -R $user:$user /var/www
+    chown -R www-data:www-data /var/www
 
-USER $user
+# Set proper permissions for Laravel storage and cache directories
+RUN mkdir -p /var/www/storage/framework/views /var/www/storage/logs && \
+    chown -R www-data:www-data /var/www/storage && \
+    chown -R www-data:www-data /var/www/bootstrap/cache && \
+    chmod -R 775 /var/www/storage && \
+    chmod -R 775 /var/www/bootstrap/cache
+
+# Generate self-signed SSL certificates for development
+RUN mkdir -p /etc/ssl/certs && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/certs/selfsigned.key \
+    -out /etc/ssl/certs/selfsigned.crt \
+    -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
 
 EXPOSE 9000
 CMD ["php-fpm"]

@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-@include('admin.partials.sidebar')
-@include('admin.partials.topbar')
+<div class="min-h-screen bg-gray-100" x-data="{ sidebarOpen: false }">
+    @include('admin.partials.sidebar')
+    @include('admin.partials.topbar')
 
-<main class="lg:ml-64 pt-16 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
+    <main class="lg:ml-64 pt-16 min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
     <div class="p-6">
         <div class="mb-6">
             <div class="flex items-center space-x-3">
@@ -85,5 +86,6 @@
             </div>
         </div>
     </div>
-</main>
+    </main>
+</div>
 @endsection

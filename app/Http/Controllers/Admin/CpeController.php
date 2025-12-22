@@ -32,14 +32,19 @@ class CpeController extends Controller
             return view('admin.cpe.index', [
                 'connected' => false,
                 'error' => 'Failed to connect to GenieACS. Please check your configuration.',
-                'devices' => []
+                'devices' => [],
+                'stats' => [
+                    'total' => 0,
+                    'online' => 0,
+                    'offline' => 0,
+                ]
             ]);
         }
 
-        // Process devices to add status
+        // Process devices to add status and PPPoE info
         $processedDevices = collect($devices)->map(function ($device) {
             $lastInform = $device['_lastInform'] ?? null;
-            
+
             // Handle different lastInform formats (timestamp or ISO date string)
             $lastInformTimestamp = null;
             if ($lastInform) {
@@ -49,9 +54,18 @@ class CpeController extends Controller
                     $lastInformTimestamp = strtotime($lastInform) * 1000;
                 }
             }
-            
+
             $now = time() * 1000;
             $isOnline = $lastInformTimestamp && ($now - $lastInformTimestamp) < 300000; // 5 minutes
+
+            // Get PPPoE information from existing device data
+            $pppoeInfo = [
+                'username' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Username'),
+                'password' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Password'),
+                'connection_status' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ConnectionStatus'),
+                'external_ip' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ExternalIPAddress'),
+                'uptime' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Uptime'),
+            ];
 
             return [
                 'id' => $device['_id'] ?? 'Unknown',
@@ -61,6 +75,14 @@ class CpeController extends Controller
                 'ip_address' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.ExternalIPAddress'),
                 'status' => $isOnline ? 'online' : 'offline',
                 'last_inform' => $lastInformTimestamp ? date('Y-m-d H:i:s', $lastInformTimestamp / 1000) : 'Never',
+                'rx_power' => $this->getDeviceParam($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.X_BROADCOM_COM_WANPPPConnection.1.RXPower'),
+                'pppoe' => [
+                    'username' => $pppoeInfo['username'] ?? null,
+                    'password' => $pppoeInfo['password'] ?? null,
+                    'connection_status' => $pppoeInfo['connection_status'] ?? null,
+                    'external_ip' => $pppoeInfo['external_ip'] ?? null,
+                    'uptime' => $pppoeInfo['uptime'] ?? null,
+                ],
             ];
         });
 

@@ -254,7 +254,7 @@ class GenieAcsService
     public function getWiFiInfo($deviceId)
     {
         $device = $this->getDevice($deviceId);
-        
+
         if (!$device) {
             return null;
         }
@@ -264,6 +264,23 @@ class GenieAcsService
             'enabled' => $this->getParameterValue($device, 'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Enable'),
             'channel' => $this->getParameterValue($device, 'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.Channel'),
             'encryption' => $this->getParameterValue($device, 'InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.BeaconType'),
+        ];
+    }
+
+    public function getPPPoEInfo($deviceId)
+    {
+        $device = $this->getDevice($deviceId);
+
+        if (!$device) {
+            return null;
+        }
+
+        return [
+            'username' => $this->getParameterValue($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Username'),
+            'password' => $this->getParameterValue($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Password'),
+            'connection_status' => $this->getParameterValue($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ConnectionStatus'),
+            'external_ip' => $this->getParameterValue($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.ExternalIPAddress'),
+            'uptime' => $this->getParameterValue($device, 'InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Uptime'),
         ];
     }
 
